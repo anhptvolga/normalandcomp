@@ -30,4 +30,125 @@ abstract class BinaryNode extends BaseNode {
 	
 }
 
+////////////////////////////////////////////////////////
+
+class AssignOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class DivOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class ModOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class PowFunction extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class MinusOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class NotEqualOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class EqualOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class MemAccOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class PtMemAccOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class SubscriptOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class ShiftRightOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class ShiftLeftOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class GreaterEqualOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class GreaterOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class LessEqualOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class LessOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class CompoAssignOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
 ?>
