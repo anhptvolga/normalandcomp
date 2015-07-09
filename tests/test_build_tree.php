@@ -2,7 +2,7 @@
 
 <?php
 
-require_once '..\classes\BaseNode.php';
+require_once '..\inout.php';
 
 class buildTreeTest extends PHPUnit_Framework_TestCase {
 	
@@ -28,6 +28,7 @@ class buildTreeTest extends PHPUnit_Framework_TestCase {
 	}
 	
 	public function test_oneOperand() {
+		$expression = "a";
 		
 	}
 	
