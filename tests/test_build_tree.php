@@ -2,10 +2,29 @@
 
 <?php
 
+require_once '..\classes\BaseNode.php';
+
 class buildTreeTest extends PHPUnit_Framework_TestCase {
 	
+	public $typeOfVars;
+	
 	public static function setUpBeforeClass() {
-		
+		$this->typeOfVars["5"] = VarType::CONSTINT;
+		$this->typeOfVars["2"] = VarType::CONSTINT;
+		$this->typeOfVars["0"] = VarType::CONSTINT;
+		$this->typeOfVars["-2"] = VarType::CONSTINT;
+		$this->typeOfVars["1"] = VarType::CONSTINT;
+		$this->typeOfVars["2.4"] = VarType::CONSTFLOAT;
+		$this->typeOfVars["0.5"] = VarType::CONSTFLOAT;
+		$this->typeOfVars["a"] = VarType::INT;
+		$this->typeOfVars["b"] = VarType::FLOAT;
+		$this->typeOfVars["d"] = VarType::INT;
+		$this->typeOfVars["e"] = VarType::INT;
+		$this->typeOfVars["f"] = VarType::INT;
+		$this->typeOfVars["i"] = VarType::INT;
+		$this->typeOfVars["x"] = VarType::INT;
+		$this->typeOfVars["y"] = VarType::INT;
+		$this->typeOfVars["arr"] = VarType::INT;
 	}
 	
 	public function test_oneOperand() {

@@ -31,7 +31,7 @@ function readTypeVar($file) {
 	
 	ini_set('error_reporting', 30711);
 	
-	$file = '..\testinput\test.xml';
+	//$file = '..\testinput\test.xml';
 	
 	function startElement($parser, $name, $attrs) {
 		global $typeOfVars;
@@ -60,33 +60,25 @@ function readTypeVar($file) {
 	
 	$xml_parser = xml_parser_create();
 	xml_set_element_handler($xml_parser, "startElement", "endElement");
-	if (!($fp = fopen($file, "r"))) {
-	    die("could not open XML input");
+	if ( !file_exists($file) ) {
+        throw new Exception("Xml-file not found");
+    }
+	
+	$fp = fopen($file, "r");
+	
+	while ($data = fread($fp, 4096)) {
+	    if (!xml_parse($xml_parser, $data, feof($fp))) {
+	        throw new Exception("Error parsing xml in line ".xml_get_current_line_number($xml_parser));
+	    }
 	}
 	
-	try {
-		while ($data = fread($fp, 4096)) {
-		    if (!xml_parse($xml_parser, $data, feof($fp))) {
-		        die(sprintf("XML error: %s at line %d",
-		                    xml_error_string(xml_get_error_code($xml_parser)),
-		                    xml_get_current_line_number($xml_parser)));
-		    }
-		}	
-	}
-	catch (Exception $e) {
-		echo $e->getMessage();
-		xml_parser_free($xml_parser);
-		return FALSE;	
-	}
 	xml_parser_free($xml_parser);
-	return TRUE;
-	
+		
 }
 
 
 function printTreeToDOT($file, $curNode) {
 	
 }
-
 
 ?>
