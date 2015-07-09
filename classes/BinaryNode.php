@@ -145,7 +145,7 @@ class LessOperator extends BinaryNode {
 }
 
 class CompoAssignOperator extends BinaryNode {
-	
+	public $compoOperator;
 	public function convert($parent) {
 		
 	}
