@@ -164,7 +164,7 @@ function isTreeEqual($tree1, $tree2, $isPrintDiff = FALSE) {
 		return false;
 	}
 	if (is_a($tree1, 'Operand')){
-		if ($tree1->name !== $tree2->name){
+		if ($tree1->name != $tree2->name){
 			if ($isPrintDiff){
 				echo "____ name of operand diff\n";
 				echo "__________ result = ".$tree1->name."\n";
@@ -172,7 +172,7 @@ function isTreeEqual($tree1, $tree2, $isPrintDiff = FALSE) {
 			}
 			return false;
 		}
-		if ($tree1->number !== $tree2->number){
+		if ($tree1->number != $tree2->number){
 			if ($isPrintDiff){
 				echo "____ number of operand diff\n";
 				echo "__________ result = ".$tree1->number."\n";
@@ -192,11 +192,12 @@ function isTreeEqual($tree1, $tree2, $isPrintDiff = FALSE) {
 		$res = count($tree1->childrens) == count($tree2->childrens);
 		$i = 0;
 		while ($res && $i < count($tree1->childrens)) {
-			$res = $res && isTreeEqual($tree1->childrens[$i], $tree2->childrens[$i]);
+			$res = $res && isTreeEqual($tree1->childrens[$i], $tree2->childrens[$i], $isPrintDiff);
 			$i ++;
 		}
 		return $res;
 	}
+	
 	return TRUE;
 }
 
@@ -396,13 +397,15 @@ function buildTree($expression, $typeOfVars) {
 		throw new Exception("Expression invalid");
 	}
 	
+	/*
 	// print to dot-file
 	$data = new block_formal_langs_tree_dot_representation();
     $data->build_tree($result->syntaxtree);
     $file = fopen("treee.gv", "w");
     fwrite($file, $data->to_dot());
 	fclose($file);
-	
+	 * 
+	 */
 	
 	
 	
@@ -410,12 +413,15 @@ function buildTree($expression, $typeOfVars) {
 	$root = filter_node($result->syntaxtree[0]);
 	
 	//echo "----------\n";
-	//var_dump($root);
+	/*
+	var_dump($root);
 	$file = fopen("tree.gv", "w");
 	fwrite($file,'digraph {');
 	printTreeToDOT($file, $root);
 	fwrite($file,'}');
 	fclose($file);
+	*/ 
+	
 	return $root;
 	
 }
@@ -471,7 +477,5 @@ function readTypeVar($file) {
 
 
 
-$expression = "a == 3.4";
-buildTree($expression, $typeOfVars);
 
 ?>

@@ -12,9 +12,9 @@ abstract class KDimNode extends BaseNode {
 		for ($i = 0; $i < count($this->childrens); $i++) {
 			for ($j = $i + 1; $j < count($this->childrens); $j++){
 				if ($this->childrens[$i]->treeInString > $this->childrens[$j]->treeInString) {
-					$tmp = $this->childrens[$i]->treeInString;
-					$this->childrens[$i]->treeInString = $this->childrens[$j]->treeInString;;					
-					$this->childrens[$j]->treeInString = $tmp;
+					$tmp = $this->childrens[$i];
+					$this->childrens[$i] = $this->childrens[$j];				
+					$this->childrens[$j] = $tmp;
 				}
 			}
 		}
@@ -25,9 +25,7 @@ abstract class KDimNode extends BaseNode {
 		
 		for ($i = 0; $i < count($this->childrens); $i ++) {
 			if (get_class($this) == get_class($this->childrens[$i])) {
-				//foreach ($this->childrens[$i]->childrens as $value) {
-				//	array_push($this->childrens, $value);
-				//}
+				
 				for ($j = count($this->childrens[$i]->childrens)-1; $j >=0; $j --) {
 					array_push($this->childrens, $this->childrens[$i]->childrens[$j]);
 				}
@@ -35,17 +33,7 @@ abstract class KDimNode extends BaseNode {
 				$i--;
 			}
 		}		
-		/*
-		for ($i = count($this->childrens)-1; $i >= 0; $i --){
-			if (get_class($this) == get_class($this->childrens[$i])){
-				for ($j = count($this->childrens[$i]->childrens); $j >=0; $j --) {
-					array_push($this->childrens, $this->childrens[$i]->childrens[$j]);
-				}
-				array_splice($this->childrens, $i, 1);
-				$i++;
-			}
-		}
-		 */
+		
 	}
 	
 	public function convertEachChildrens() {
