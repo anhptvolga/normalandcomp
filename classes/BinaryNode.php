@@ -144,11 +144,45 @@ class LessOperator extends BinaryNode {
 	}
 }
 
-class CompoAssignOperator extends BinaryNode {
-	public $compoOperator;
+class PlusAssignOperator extends BinaryNode {
+	
 	public function convert($parent) {
 		
 	}
 }
 
+class MinusAssignOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class DivAssignOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class MultiAssignOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class ShrAssignOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
+
+class ShlAssignOperator extends BinaryNode {
+	
+	public function convert($parent) {
+		
+	}
+}
 ?>

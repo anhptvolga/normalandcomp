@@ -2,7 +2,6 @@
 
 <?php
 
-require_once '..\classes\BaseNode.php';
 require_once '..\inout.php';
 
 $typeOfVars = array();
@@ -33,13 +32,14 @@ class buildTreeTest extends PHPUnit_Framework_TestCase {
 		global $typeOfVars;
 		$expression = "a";
 		$result = buildTree($expression, $typeOfVars);
+
 		$this->assertTrue(is_a($result, 'Operand'), "type of root not correct");
-		$this->assertEquals($result->name === "a", "name of operand not correct");
+		$this->assertEquals("a",$result->name, "name of operand not correct");
 	}
 	
 	/**
 	 * @expectedException Exception
-	 * @expectedExceptionMessage Expression "*" invalid
+	 * @expectedExceptionMessage Expression invalid
 	 */
 	public function test_oneOperator() {
 		global $typeOfVars;
@@ -49,7 +49,7 @@ class buildTreeTest extends PHPUnit_Framework_TestCase {
 	
 	/**
 	 * @expectedException Exception
-	 * @expectedExceptionMessage Expression "a +" invalid
+	 * @expectedExceptionMessage Expression invalid
 	 */
 	public function test_notEnoughOperand() {
 		global $typeOfVars;
@@ -59,21 +59,11 @@ class buildTreeTest extends PHPUnit_Framework_TestCase {
 	
 	/**
 	 * @expectedException Exception
-	 * @expectedExceptionMessage Expression "a + b c" invlid
+	 * @expectedExceptionMessage Expression invalid
 	 */
 	public function test_notEnoughOperator() {
 		global $typeOfVars;
 		$expression = "a + b c";
-		$result = buildTree($expression, $typeOfVars);
-	}
-	
-	/**
-	 * @expectedException Exception
-	 * @expectedExceptionMessage Not found type of: woie
-	 */
-	public function test_notHaveType() {
-		global $typeOfVars;
-		$expression = "a + b + woie";
 		$result = buildTree($expression, $typeOfVars);
 	}
 	
@@ -82,8 +72,8 @@ class buildTreeTest extends PHPUnit_Framework_TestCase {
 		$expression = "!a";
 		$result = buildTree($expression, $typeOfVars);
 		$this->assertTrue(is_a($result, 'NotLogicOperator'), "type of root error");
-		$this->assertTure(is_a($result->children, 'Operand'), "type of children error");
-		$this->assertEquals("a", $result->childrens->name, "name of operand error");
+		$this->assertTrue(is_a($result->children, 'Operand'), "type of children error");
+		$this->assertEquals("a", $result->children->name, "name of operand error");
 	}
 	
 	public function test_onlyBinary() {
@@ -116,9 +106,9 @@ class buildTreeTest extends PHPUnit_Framework_TestCase {
 		$this->assertTrue(is_a($result->childrens[1], 'Operand'), "type of 2-sd children error");
 		$this->assertTrue(is_a($result->childrens[2], 'Operand'), "type of 3-rd children error");
 		
-		$this->assertEquals("a", $result->childrens[0]->name, "name of 1-st children error");
+		$this->assertEquals("c", $result->childrens[0]->name, "name of 1-st children error");
 		$this->assertEquals("b", $result->childrens[1]->name, "name of 2-sd children error");
-		$this->assertEquals("c", $result->childrens[2]->name, "name of 3-rd children error");
+		$this->assertEquals("a", $result->childrens[2]->name, "name of 3-rd children error");
 		
 	}
 	
@@ -140,25 +130,25 @@ class buildTreeTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(3, count($result->right->childrens[0]->childrens), "number of 1-st children or logic operator error");
 		$this->assertEquals(3, count($result->right->childrens[1]->childrens), "number of 2-sd children or logic operator error");
 		
-		$this->assertTrue(is_a($result->right->childrens[0]->childrens[0], 'NotLogicOperator'), "type of 1-st children of 1-st and logic error");
-		$this->assertTrue(is_a($result->right->childrens[0]->childrens[0]->children, 'Operand'), "type of 1-st children of 1-st and logic error");
-		$this->assertEquals("a", $result->right->childrens[0]->childrens[0]->children->name, "name of 1-st children of 1-st and logic error");
+		$this->assertTrue(is_a($result->right->childrens[0]->childrens[2], 'NotLogicOperator'), "type of 1-st children of 1-st and logic error");
+		$this->assertTrue(is_a($result->right->childrens[0]->childrens[2]->children, 'Operand'), "type of 1-st children of 1-st and logic error");
+		$this->assertEquals("a", $result->right->childrens[0]->childrens[2]->children->name, "name of 1-st children of 1-st and logic error");
 		
 		$this->assertTrue(is_a($result->right->childrens[0]->childrens[1], 'Operand'), "type of 2-sd children of 1-st and logic error");
-		$this->assertEquals("a", $result->right->childrens[0]->childrens[1]->name, "name of 2-sd children of 1-st and logic error");
-		$this->assertTrue(is_a($result->right->childrens[0]->childrens[2], 'Operand'), "type of 3-rd children of 1-st and logic error");
-		$this->assertEquals("a", $result->right->childrens[0]->childrens[2]->name, "name of 3-rd children of 1-st and logic error");
+		$this->assertEquals("b", $result->right->childrens[0]->childrens[1]->name, "name of 2-sd children of 1-st and logic error");
+		$this->assertTrue(is_a($result->right->childrens[0]->childrens[0], 'Operand'), "type of 3-rd children of 1-st and logic error");
+		$this->assertEquals("c", $result->right->childrens[0]->childrens[0]->name, "name of 3-rd children of 1-st and logic error");
 		
-		$this->assertTrue(is_a($result->right->childrens[1]->childrens[0], 'Operand'), "type of 1-st children of 2-sd and logic error");
-		$this->assertEquals("a", $result->right->childrens[1]->childrens[0]->name, "name of 1-st children of 2-sd and logic error");
+		$this->assertTrue(is_a($result->right->childrens[1]->childrens[2], 'Operand'), "type of 1-st children of 2-sd and logic error");
+		$this->assertEquals("a", $result->right->childrens[1]->childrens[2]->name, "name of 1-st children of 2-sd and logic error");
 		
 		$this->assertTrue(is_a($result->right->childrens[1]->childrens[1], 'NotLogicOperator'), "type of 2-sd children of 2-sd and logic error");
 		$this->assertTrue(is_a($result->right->childrens[1]->childrens[1]->children, 'Operand'), "type of 2-sd children of 2-sd and logic error");
-		$this->assertEquals("a", $result->right->childrens[1]->childrens[1]->children->name, "name of 2-sd children of 2-sd and logic error");
+		$this->assertEquals("b", $result->right->childrens[1]->childrens[1]->children->name, "name of 2-sd children of 2-sd and logic error");
 		
-		$this->assertTrue(is_a($result->right->childrens[1]->childrens[2], 'NotLogicOperator'), "type of 3-rd children of 3-rd and logic error");
-		$this->assertTrue(is_a($result->right->childrens[1]->childrens[2]->children, 'Operand'), "type of 2-sd children of 3-rd and logic error");
-		$this->assertEquals("a", $result->right->childrens[1]->childrens[2]->children->name, "name of 2-sd children of 3-rd and logic error");
+		$this->assertTrue(is_a($result->right->childrens[1]->childrens[0], 'NotLogicOperator'), "type of 3-rd children of 3-rd and logic error");
+		$this->assertTrue(is_a($result->right->childrens[1]->childrens[0]->children, 'Operand'), "type of 2-sd children of 3-rd and logic error");
+		$this->assertEquals("c", $result->right->childrens[1]->childrens[0]->children->name, "name of 2-sd children of 3-rd and logic error");
 		
 	}
 	
@@ -175,8 +165,8 @@ class buildTreeTest extends PHPUnit_Framework_TestCase {
 		$this->assertTrue(is_a($result->children->childrens[0], 'Operand'), "type of 1-st children error");
 		$this->assertTrue(is_a($result->children->childrens[1], 'Operand'), "type of 2-nd children error");
 		
-		$this->asserEquals("a", $this->childrens->childrens[0]->name, "name of 1-st children error");
-		$this->asserEquals("i", $this->childrens->childrens[1]->name, "name of 2-nd children error");
+		$this->assertEquals("a", $result->children->childrens[0]->name, "name of 1-st children error");
+		$this->assertEquals("i", $result->children->childrens[1]->name, "name of 2-nd children error");
 		
 	}
 	
@@ -315,8 +305,7 @@ class buildTreeTest extends PHPUnit_Framework_TestCase {
 		$expression = "a += b";
 		$result = buildTree($expression, $typeOfVars);
 		
-		$this->assertTrue(is_a($result, 'CompoAssignOperator'), "type of root error");
-		$this->assertEquals("+=", $result->compoOperator, "type of compo assign error");
+		$this->assertTrue(is_a($result, 'PlusAssignOperator'), "type of root error");
 		
 		$this->assertTrue(is_a($result->left, 'Operand'), "type of left children error");
 		$this->assertEquals("a", $result->left->name, "name of left children error");
@@ -329,8 +318,7 @@ class buildTreeTest extends PHPUnit_Framework_TestCase {
 		$expression = "a -= b";
 		$result = buildTree($expression, $typeOfVars);
 		
-		$this->assertTrue(is_a($result, 'CompoAssignOperator'), "type of root error");
-		$this->assertEquals("-=", $result->compoOperator, "type of compo assign error");
+		$this->assertTrue(is_a($result, 'MinusAssignOperator'), "type of root error");
 		
 		$this->assertTrue(is_a($result->left, 'Operand'), "type of left children error");
 		$this->assertEquals("a", $result->left->name, "name of left children error");
@@ -343,8 +331,7 @@ class buildTreeTest extends PHPUnit_Framework_TestCase {
 		$expression = "a *= b";
 		$result = buildTree($expression, $typeOfVars);
 		
-		$this->assertTrue(is_a($result, 'CompoAssignOperator'), "type of root error");
-		$this->assertEquals("*=", $result->compoOperator, "type of compo assign error");
+		$this->assertTrue(is_a($result, 'MultiAssignOperator'), "type of root error");
 		
 		$this->assertTrue(is_a($result->left, 'Operand'), "type of left children error");
 		$this->assertEquals("a", $result->left->name, "name of left children error");
@@ -357,8 +344,7 @@ class buildTreeTest extends PHPUnit_Framework_TestCase {
 		$expression = "a /= b";
 		$result = buildTree($expression, $typeOfVars);
 		
-		$this->assertTrue(is_a($result, 'CompoAssignOperator'), "type of root error");
-		$this->assertEquals("/=", $result->compoOperator, "type of compo assign error");
+		$this->assertTrue(is_a($result, 'DivAssignOperator'), "type of root error");
 		
 		$this->assertTrue(is_a($result->left, 'Operand'), "type of left children error");
 		$this->assertEquals("a", $result->left->name, "name of left children error");
@@ -371,8 +357,7 @@ class buildTreeTest extends PHPUnit_Framework_TestCase {
 		$expression = "a <<= b";
 		$result = buildTree($expression, $typeOfVars);
 		
-		$this->assertTrue(is_a($result, 'CompoAssignOperator'), "type of root error");
-		$this->assertEquals("<<=", $result->compoOperator, "type of compo assign error");
+		$this->assertTrue(is_a($result, 'ShlAssignOperator'), "type of root error");
 		
 		$this->assertTrue(is_a($result->left, 'Operand'), "type of left children error");
 		$this->assertEquals("a", $result->left->name, "name of left children error");
@@ -385,8 +370,7 @@ class buildTreeTest extends PHPUnit_Framework_TestCase {
 		$expression = "a >>= b";
 		$result = buildTree($expression, $typeOfVars);
 		
-		$this->assertTrue(is_a($result, 'CompoAssignOperator'), "type of root error");
-		$this->assertEquals(">>=", $result->compoOperator, "type of compo assign error");
+		$this->assertTrue(is_a($result, 'ShrAssignOperator'), "type of root error");
 		
 		$this->assertTrue(is_a($result->left, 'Operand'), "type of left children error");
 		$this->assertEquals("a", $result->left->name, "name of left children error");
@@ -438,7 +422,7 @@ class buildTreeTest extends PHPUnit_Framework_TestCase {
 		$expression = "a.b";
 		$result = buildTree($expression, $typeOfVars);
 		
-		$this->assertTrue(is_a($result, 'PtMemAccOperator'), "type of root error");
+		$this->assertTrue(is_a($result, 'MemAccOperator'), "type of root error");
 		
 		$this->assertTrue(is_a($result->left, 'Operand'), "type of left children error");
 		$this->assertEquals("a", $result->left->name, "name of left children error");
@@ -452,7 +436,7 @@ class buildTreeTest extends PHPUnit_Framework_TestCase {
 		$expression = "a->b";
 		$result = buildTree($expression, $typeOfVars);
 		
-		$this->assertTrue(is_a($result, 'MemAccOperator'), "type of root error");
+		$this->assertTrue(is_a($result, 'PtMemAccOperator'), "type of root error");
 		
 		$this->assertTrue(is_a($result->left, 'Operand'), "type of left children error");
 		$this->assertEquals("a", $result->left->name, "name of left children error");

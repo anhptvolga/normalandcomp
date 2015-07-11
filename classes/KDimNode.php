@@ -23,6 +23,29 @@ abstract class KDimNode extends BaseNode {
 	
 	public function goUpChildrens() {
 		
+		for ($i = 0; $i < count($this->childrens); $i ++) {
+			if (get_class($this) == get_class($this->childrens[$i])) {
+				//foreach ($this->childrens[$i]->childrens as $value) {
+				//	array_push($this->childrens, $value);
+				//}
+				for ($j = count($this->childrens[$i]->childrens)-1; $j >=0; $j --) {
+					array_push($this->childrens, $this->childrens[$i]->childrens[$j]);
+				}
+				array_splice($this->childrens, $i, 1);
+				$i--;
+			}
+		}		
+		/*
+		for ($i = count($this->childrens)-1; $i >= 0; $i --){
+			if (get_class($this) == get_class($this->childrens[$i])){
+				for ($j = count($this->childrens[$i]->childrens); $j >=0; $j --) {
+					array_push($this->childrens, $this->childrens[$i]->childrens[$j]);
+				}
+				array_splice($this->childrens, $i, 1);
+				$i++;
+			}
+		}
+		 */
 	}
 	
 	public function convertEachChildrens() {
