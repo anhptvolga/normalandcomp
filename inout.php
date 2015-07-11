@@ -153,8 +153,51 @@ function printTreeToDOT($file, $curNode) {
 }
 
 
-function isTreeEqual($tree1, $tree2, $isPrintDiff) {
+function isTreeEqual($tree1, $tree2, $isPrintDiff = FALSE) {
 	
+	if (get_class($tree1) != get_class($tree2)) {
+		if($isPrintDiff){
+			echo "____ type of node diff\n";
+			echo "__________ result = ".get_class($tree1)."\n";
+			echo "__________ expected = ".get_class($tree2)."\n";
+		}
+		return false;
+	}
+	if (is_a($tree1, 'Operand')){
+		if ($tree1->name !== $tree2->name){
+			if ($isPrintDiff){
+				echo "____ name of operand diff\n";
+				echo "__________ result = ".$tree1->name."\n";
+				echo "__________ expected = ".$tree2->name."\n";
+			}
+			return false;
+		}
+		if ($tree1->number !== $tree2->number){
+			if ($isPrintDiff){
+				echo "____ number of operand diff\n";
+				echo "__________ result = ".$tree1->number."\n";
+				echo "__________ expected = ".$tree2->number."\n";
+			}
+			return false;
+		}
+	}
+	elseif (is_subclass_of($tree1, 'OneDimNode')) {
+		return isTreeEqual($tree1->children, $tree2->children, $isPrintDiff);
+	}
+	elseif (is_subclass_of($tree1, 'BinaryNode')) {
+		return isTreeEqual($tree1->left, $tree2->left, $isPrintDiff) &&
+				isTreeEqual($tree1->right, $tree2->right, $isPrintDiff);
+	}
+	elseif (is_subclass_of($tree1, 'KDimNode')) {
+		$res = count($tree1->childrens) == count($tree2->childrens);
+		$i = 0;
+		while ($res && $i < count($tree1->childrens)) {
+			$res = $res && isTreeEqual($tree1->childrens[$i], $tree2->childrens[$i]);
+			$i ++;
+		}
+		return $res;
+	}
+	return TRUE;
 }
 
 function readExp($filename, &$exp1, &$exp2) {
