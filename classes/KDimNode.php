@@ -82,7 +82,72 @@ class MultiOperator extends KDimNode {
 	}
 	
 	public function convertDivInMult()	{
+		$divop = array();				// временный массив
+		// взять дроби
+		for ($i = 0; $i < count($this->childrens); $i ++) {
+			if (get_class($this->childrens[$i]) == 'DivOperator'){
+				array_push($divop, $this->childrens[$i]);
+				array_splice($this->childrens, $i, 1);
+				$i --;
+			}
+		} 
+		// создать новый 
+		if (count($divop) > 1) {
+			$tmp = new MultiOperator();
+			foreach ($divop as $i => $value) {
+				array_push($tmp->childrens, $value->right);
+			}
+			$newch = new DivOperator();
+			$newch->left = new Operand("1", 1, VarType::INT);
+			$newch->right = $tmp;
+			
+			array_push($divop, $newch);
+		}
+		// возвращать в списку сыновей
+		foreach ($divop as $key => $value) {
+			array_push($this->childrens, $value);
+		}
+	}
+	
+	public function openBracket(){
+		$multElements = array();		// список умножителей
+		$conf = array();				// перестановка
+		// Инициализировать список умножителей.
+		for ($i = 0; $i < count($this->childrens); $i++)
+		{
+			$conf[$i] = 0;
+			if (get_class($this->childrens[$i]) == 'PlusOperator'){
+				array_push($multElements, $this->childrens[$i]->childrens);
+			}
+			else {
+				array_push($multElements, array($this->childrens[$i]));
+			}
+		}
+		//////////////////////////////////////////////////////////////////////////
+		$res = new PlusOperator();				// новая корень
+		$isStop = FALSE;						// флаг стопа
+		while (!$isStop)	{
+			
+			// создать узел умножения
+			$cur = new MultiOperator();
+			for ($i = 0; $i < count($multElements); $i++){
+				array_push($cur->childrens, $multElements[$i][$conf[$i]]);
+			}
+			array_push($res->childrens, $cur);
+			
+			// Вычисление следующей перестановки
+			$prev = 1;
+			for ($i = count($multElements) - 1; $i >= 0; $i--){
+				$conf[$i] = (1 + $conf[$i]) % count($multElements[$i]);
+				if ($i == 0 && $conf[$i] == 0)
+					$isStop = true;
+				if ($conf[$i] != 0)
+					break;
+			}
+			
+		}
 		
+		return $res;
 	}
 	
 }

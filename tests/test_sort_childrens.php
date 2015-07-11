@@ -51,19 +51,6 @@ class sortChildrensTest extends PHPUnit_Framework_TestCase {
 		$tree1->sortChildrens();
 		$tree2->sortChildrens();
 		
-		$file = fopen("tree1.gv", "w");
-		fwrite($file,'digraph {');
-		printTreeToDOT($file, $tree1);
-		fwrite($file,'}');
-		fclose($file);
-		
-		$file = fopen("tree2.gv", "w");
-		fwrite($file,'digraph {');
-		printTreeToDOT($file, $tree2);
-		fwrite($file,'}');
-		fclose($file);
-		
-		
 		$this->assertTrue(isTreeEqual($tree1, $tree2, FALSE));
 	}
 }

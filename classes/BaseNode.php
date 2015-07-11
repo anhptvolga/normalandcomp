@@ -29,8 +29,8 @@ interface VarType {
 
 abstract class BaseNode {
 	
-	public $pToNewChild;
-	public $treeInString;
+	public $pToNewChild = null;
+	public $treeInString = null;
 	
 	abstract public function convert($parent);
 	
