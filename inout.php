@@ -1,5 +1,6 @@
 <?php
 
+
 global $CFG;
 
 define('MOODLE_INTERNAL', 1);
@@ -17,117 +18,15 @@ require_once($CFG->dirroot .'/blocks/normalandcomp/classes/Operand.php');
 
 $typeOfVars = array();
 
-
-class block_formal_langs_tree_dot_representation
-{
-    /**
-     * Constructs new empty graph
-     */
-    public function __construct() {
-        $this->nodes = array();
-        $this->edges = array();
-    }
-
-    /**
-     * Adds new node to graph
-     * @param string $text a text for node
-     * @return int index
-     */
-    public function push_node($text) {
-        $id = count($this->nodes);
-        $this->nodes[] = $text;
-        return $id;
-    }
-
-    /**
-     * Adds new edge to graph
-     * @param int $from a starting node index
-     * @param int $to an ending node index
-     */
-    public function push_edge($from, $to) {
-        $this->edges[] = array($from, $to);
-    }
-
-    /**
-     * Converts everything to dot
-     * @return string data in dot representation
-     */
-    public function to_dot() {
-        $string = 'digraph G {' . PHP_EOL;
-        foreach($this->nodes as $k => $v)
-        {
-            $string .=  '    node_' . $k . ' [ shape=box label="' . str_replace('"', '\\"', $v) . '" ]' . PHP_EOL;
-        }
-        foreach($this->edges as $edge)
-        {
-            $string .=  '    node_' . $edge[0] . ' -> node_' . $edge[1] . PHP_EOL;
-        }
-        $string .= '}';
-        return $string;
-    }
-
-    /**
-     * Строит данные по результатам
-     * @param array|block_formal_langs_ast_node_base $node вершины
-     * @return int id самой верхней вершины
-     */
-    public function build_tree($node) {
-        if (is_array($node)) {
-            foreach($node as $child) {
-                $this->build_tree($child);
-            }
-            return 0;
-        } else {
-            if (is_a($node, 'block_formal_langs_ast_node_base')) {
-                $text = 0;
-                if (count($node->childs()) == 0 && method_exists($node, 'value')) {
-                    //$text = $node->value();
-					$text = $node->type()."\n".$node->value();
-                } else {
-                    $classname = get_class($node);
-                    $text = $node->type();
-                    if ($classname != 'block_formal_langs_ast_node_base' && $classname != 'block_formal_langs_token_base')
-                    {
-                        $text .= '(' . $classname . ')';
-                    }
-                }
-
-                $myid = $this->push_node($text);
-                if (count($node->childs())) {
-                    foreach($node->childs() as $child) {
-                        $nodeid = $this->build_tree($child);
-                        $this->push_edge($myid, $nodeid);
-                    }
-                }
-                return $myid;
-            } else {
-                return $this->push_node(var_export($node, true));
-            }
-        }
-    }
-
-    /**
-     * A list of nodes texts, indexed as lists
-     * @var array
-     */
-    protected  $nodes;
-    /**
-     * A list of edges, as array of node indexes
-     * @var
-     */
-    protected $edges;
-};
-
-
-
-
 function printTreeToDOT($file, $curNode) {
 	static $globalid = 0;
 	$id = $globalid;
 	++$globalid;
-	fwrite($file, $id.' [label = '.get_class($curNode));
 	if (is_a($curNode, 'Operand')){
-		fwrite($file, "__".$curNode->name);
+		fwrite($file, $id.' [label = '.$curNode->name);
+	}
+	else {
+		fwrite($file, $id.' [label = "'.$curNode->getLabel(get_class($curNode)).'"');
 	}
 	fwrite($file,"]\n");
 	if (is_subclass_of($curNode, 'OneDimNode')) {
@@ -396,18 +295,6 @@ function buildTree($expression, $typeOfVars) {
 	if (count($result->syntaxtree) > 1 || $result->syntaxtree[0]->type()==='operators') {
 		throw new Exception("Expression invalid");
 	}
-	
-	/*
-	// print to dot-file
-	$data = new block_formal_langs_tree_dot_representation();
-    $data->build_tree($result->syntaxtree);
-    $file = fopen("treee.gv", "w");
-    fwrite($file, $data->to_dot());
-	fclose($file);
-	 * 
-	 */
-	
-	
 	
 	// создать дерево свое
 	$root = filter_node($result->syntaxtree[0]);

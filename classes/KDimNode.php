@@ -41,8 +41,9 @@ abstract class KDimNode extends BaseNode {
 			// convert each children
 			$children->convert($this);
 			while ($children->pToNewChild !== null) {
-				$tmp = $children;
-				$children = $children->pToNewChild;
+				$tmp = $children->pToNewChild;
+				$children = clone $children->pToNewChild;
+				$tmp->deleteChildrens();
 				$children->pToNewChild = null;
 				$children->convert($this);
 			}	
@@ -57,6 +58,19 @@ abstract class KDimNode extends BaseNode {
 		}
 	}
 	
+	public function deleteChildrens()	{ 
+		for ($i = 0; $i < count($this->childrens); $i ++) {
+			$this->childrens[$i]->deleteChildrens();
+		}
+		unset ($this->childrens);
+		$this->childrens = array();
+	}
+	
+	public function __clone() {
+		for ($i = 0; $i < count($this->childrens); $i++) {
+			$this->childrens[$i] = clone $this->childrens[$i];
+		}
+	}
 }
 
 /////////////////////////////////////////////////////////////////

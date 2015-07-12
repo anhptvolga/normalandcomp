@@ -29,6 +29,18 @@ class Operand extends BaseNode {
 		$this->treeInString = $this->name;	
 	}
 	
+	public function deleteChildrens()	{
+		unset ($this->name);
+		unset ($this->number);
+		unset ($this->typeOfVar);
+		$this->name = null;
+		$this->number = null;
+		$this->typeOfVar = null;
+	}
+	
+	public function __clone() {
+		
+	}
 }
 
 ?>

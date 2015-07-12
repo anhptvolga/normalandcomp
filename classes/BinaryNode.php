@@ -12,8 +12,9 @@ abstract class BinaryNode extends BaseNode {
 		// convert left children
 		$this->left->convert($this);
 		while ($this->left->pToNewChild !== null) {
-			$tmp = $this->left;
-			$this->left = $this->left->pToNewChild;
+			$tmp = $this->left->pToNewChild;
+			$this->left = clone $this->left->pToNewChild;
+			$tmp->deleteChildrens();
 			$this->left->pToNewChild = null;
 			$this->left->convert($this);
 		}
@@ -21,8 +22,11 @@ abstract class BinaryNode extends BaseNode {
 		// convert right children
 		$this->right->convert($this);
 		while ($this->right->pToNewChild !== null) {
-			$tmp = $this->right;
-			$this->right = $this->right->pToNewChild;
+			$tmp = $this->right->pToNewChild;
+			//var_dump($this);
+			$this->right = clone $this->right->pToNewChild;
+			//var_dump($this);
+			$tmp->deleteChildrens();
 			$this->right->pToNewChild = null;
 			$this->right->convert($this);
 		}
@@ -34,6 +38,19 @@ abstract class BinaryNode extends BaseNode {
 		$this->treeInString .= $this->right->treeInString." ";	
 	}
 	
+	public function deleteChildrens()	{
+		$this->left->deleteChildrens();
+		$this->right->deleteChildrens();
+		unset ($this->left);
+		unset ($this->right);
+		$this->left = null;
+		$this->right = null;
+	}
+	
+	public function __clone() {
+		$this->left = clone $this->left;
+		$this->right = clone $this->right;
+	}
 }
 
 ////////////////////////////////////////////////////////

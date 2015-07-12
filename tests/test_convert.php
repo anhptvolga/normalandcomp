@@ -5,6 +5,7 @@ require_once '..\inout.php';
 
 $typeOfVars = array();
 
+ini_set('memory_limit', '-1');
 
 class convertTest extends PHPUnit_Framework_TestCase {
 		
@@ -39,14 +40,14 @@ class convertTest extends PHPUnit_Framework_TestCase {
 	
 	public function mydataProvider() {
 		return array(
-			array('a - 3 * 4 + 4','a + -8'),
-			array('b + a + d + e','e + d + b + a'),
-			array('pow(a, 3)','a * a * a'),
-			array(' pow(a, 2.4)',' pow(a, 2.4)'),
-			array(' pow(a,c)','pow(a,c)'),
-			array('(a+b)*2','a + a + b + b'),
-			array('(a+b) * -2','- a - a - b - b'),
-			array('(a+b) * 2.4','a*2.4 + b*2.4'),
+			//array('a - 3 * 4 + 4','a + -8'),
+			//array('b + a + d + e','e + d + b + a'),
+			//array('pow(a, 3)','a * a * a'),
+			//array(' pow(a, 2.4)',' pow(a, 2.4)'),
+			//array(' pow(a,c)','pow(a,c)'),
+			//array('(a+b)*2','a + a + b + b'),
+			//array('(a+b) * -2','- a - a - b - b'),
+			//array('(a+b) * 2.4','a*2.4 + b*2.4'),
 			array('(a + b - c)/d','a/d + b/d - c/d')
 			//array('','')
 			//array('','')
@@ -64,23 +65,6 @@ class convertTest extends PHPUnit_Framework_TestCase {
 		$tree1 = buildTree($expr1, $typeOfVars);
 		$tree2 = buildTree($expr2, $typeOfVars);
 		
-		$tree1->pToNewChild = null;
-		$tree1->convert($tree1);
-		while ($tree1->pToNewChild != null){
-			$tree1 = $tree1->pToNewChild;
-			$tree1->pToNewChild = null;
-			$tree1->convert($tree1);
-		}
-		
-		
-		$tree2->pToNewChild = null;
-		$tree2->convert($tree2);
-		while ($tree2->pToNewChild != null){
-			$tree2 = $tree2->pToNewChild;
-			$tree2->pToNewChild = null;
-			$tree2->convert($tree2);
-		}
-		
 		$file = fopen("tree1.gv", "w");
 		fwrite($file,"digraph {\n");
 		printTreeToDOT($file, $tree1);
@@ -93,8 +77,30 @@ class convertTest extends PHPUnit_Framework_TestCase {
 		fwrite($file,'}');
 		fclose($file);
 		
+		$tree2->pToNewChild = null;
+		$tree2->convert($tree2);
+		
+		$tree1->pToNewChild = null;
+		$tree1->convert($tree1);
+		while ($tree1->pToNewChild != null){
+			$tree1 = $tree1->pToNewChild;
+			$tree1->pToNewChild = null;
+			$tree1->convert($tree1);
+		}
+		
+		while ($tree2->pToNewChild != null){
+			$tree2 = $tree2->pToNewChild;
+			$tree2->pToNewChild = null;
+			$tree2->convert($tree2);
+		}
+		
+		
 		$this->assertTrue(isTreeEqual($tree1, $tree2, TRUE));
 		
+		$tree1->deleteChildrens();
+		$tree2->deleteChildrens();
+		unset($tree1);
+		unset($tree2);
 	}	
 	
 

@@ -38,6 +38,8 @@ abstract class BaseNode {
 	
 	abstract public function calculateTreeInString();
 	
+	abstract public function deleteChildrens();
+	
 	public function getLabel($nodetype)	{
 		switch ($nodetype) {
 			case 'PlusOperator':
@@ -103,6 +105,7 @@ abstract class BaseNode {
 				return '>>=';
 		}
 	}
+
 	
 }
 

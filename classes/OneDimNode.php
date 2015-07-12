@@ -11,8 +11,9 @@ abstract class OneDimNode extends BaseNode {
 		// convert children
 		$this->children->convert($this);
 		while ($this->children->pToNewChild !== null) {
-			$tmp = $this->children;
-			$this->children = $this->children->pToNewChild;
+			$tmp = $this->children->pToNewChild;
+			$this->children = clone $this->children->pToNewChild;
+			$tmp->deleteChildrens();
 			$this->children->pToNewChild = null;
 			$this->children->convert($this);
 		}
@@ -22,6 +23,15 @@ abstract class OneDimNode extends BaseNode {
 		$this->treeInString = $this->getLabel(get_class($this))." ".$this->children->treeInString;	
 	}
 	
+	public function deleteChildrens()	{
+		$this->children->deleteChildrens();
+		unset ($this->children);
+		$this->children = null;
+	}
+	
+	public function __clone() {
+		$this->children = clone $this->children; 	
+	}
 }
 
 /////////////////////////////////////////////////////////////////////
