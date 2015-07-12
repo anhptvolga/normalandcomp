@@ -476,7 +476,7 @@ class OrLogicOperator extends KDimNode {
 							$tmp = new NotLogicOperator();
 							$tmp->children = $fullExp[$pos];
 							array_push($this->childrens, $tmp);
-							//$tmp->calculateTreeInString();
+							$tmp->calculateTreeInString();
 						}
 					}
 				}
@@ -490,12 +490,12 @@ class OrLogicOperator extends KDimNode {
 						elseif ($eachChild[$i][$j] == '0') {
 							$notOp = new NotLogicOperator();
 							$notOp->children = $fullExp[$j];
-							//$notOp->calculateTreeInString();
+							$notOp->calculateTreeInString();
 							array_push($tmp->childrens, $notOp);
 						}
 					}
 					$tmp->sortChildrens();
-					//$tmp->calculateTreeInString();
+					$tmp->calculateTreeInString();
 					array_push($this->childrens, $tmp);
 				}
 			}
