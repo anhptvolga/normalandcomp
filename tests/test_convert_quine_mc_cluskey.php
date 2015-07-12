@@ -1,7 +1,7 @@
 
 
 <?php
-
+require_once '..\classes\KDimNode.php';
 require_once '..\inout.php';
 
 $typeOfVars = array();
@@ -27,104 +27,40 @@ class testConvertQuineMcCluskeyTest extends PHPUnit_Framework_TestCase {
 		$typeOfVars["y"] = VarType::INT;
 		$typeOfVars["arr"] = VarType::INT;
 	}
+		
+	public function mydataProvider() {
+		return array(
+			array('a || b','a || b'),
+			array('a && b && c || c','c'),
+			array('a && b || !a && b','b'),
+			array('a && b || b && c || c && d','a && b || b && c || c && d'),
+			array('!a&&!b&&!c&&d || !a&&!b&&c&&d || !a&&b&&!c&&d || !a&&b&&c&&d || a&&b&&c&&!d || a&&b&&c&&d','!a&&d || c&&b&&a'),
+			array('a > b && b > c && a > d || b > c','b > c'),
+			array('!(a>b) && (c<x-y) && !(b==2) || (a>b) && !(c<x-y) && !(b==2) || (a>b) && !(c<x-y) && (b==2)','!(c<x-y)&&(a>b) || (c<x-y)&&!(a>b)&&!(b==2)')
+			
+		);
+	}
 	
-	public function test_miniTest() {
+	/**
+	 * @dataProvider mydataProvider
+	 */
+	public function test_sortchild($expr1, $expr2) {
 		global $typeOfVars;
-		$resExpression = "a || b";
-		$expectedExpression = " a || b";
-		$resTree = buildTree($resExpression, $typeOfVars);
-		$expectedTree = buildTree($expectedExpression, $typeOfVars);
+		$tree1 = buildTree($expr1, $typeOfVars);
+		$tree2 = buildTree($expr2, $typeOfVars);
 		
-		$resTree->convertQuineMcCluskey();
+		$tree1->convertQuineMcCluskey();
 		
-		$this->assertEquals(isTreeEqual($resTree, $expectedTree, TRUE), "in mini test tree not equal");
+		$tmp;
+		if (get_class($tree2) != 'OrLogicOperator') {
+			$tmp = new OrLogicOperator();
+			array_push($tmp->childrens, $tree2);
+			$tree2 = $tmp;	
+		}
 		
+		$this->assertTrue(isTreeEqual($tree1, $tree2, TRUE));
 	}
 	
-	public function test_intercRule() {
-		global $typeOfVars;
-		$resExpression = "a && b && c || c";
-		$resTree = buildTree($resExpression, $typeOfVars);
-		
-		$resTree->convertQuineMcCluskey();
-		
-		$this->assertEquals(1, count($resTree->childrens), "sizeof childrens not correct");
-		$this->assertEquals("c", $resTree->childrens[0]->name, "not correct convert");
-		
-	}
-	
-	public function test_glueRule() {
-		global $typeOfVars;
-		$resExpression = "a && b || !a && b";
-		$resTree = buildTree($resExpression, $typeOfVars);
-		$expectedTree = buildTree($expectedExpression, $typeOfVars);
-		
-		$resTree->convertQuineMcCluskey();
-		
-		$this->assertEquals(1, count($resTree->childrens), "sizeof childrens not correct");
-		$this->assertEquals("b", $resTree->childrens[0]->name, "not correct convert");
-	}
-	
-	public function test_reduced() {
-		global $typeOfVars;
-		$resExpression = "a && b || ( b && c || c && d )";
-		$expectedExpression = "a && b || b && c || c && d";
-		$resTree = buildTree($resExpression, $typeOfVars);
-		$expectedTree = buildTree($expectedExpression, $typeOfVars);
-		
-		$resTree->convertQuineMcCluskey();
-		
-		$this->assertEquals(isTreeEqual($resTree, $expectedTree, TRUE), "in reduced test tree not equal");
-		
-	}
-	
-	public function test_onlyOperand() {
-		global $typeOfVars;
-		$resExpression = "";
-		$expectedExpression = "!a || c && b && a";
-		$resTree = buildTree($resExpression, $typeOfVars);
-		$expectedTree = buildTree($expectedExpression, $typeOfVars);
-		
-		$resTree->convertQuineMcCluskey();
-		
-		$this->assertEquals(isTreeEqual($resTree, $expectedTree, TRUE), "in mini test tree not equal");
-		
-	}
-	
-	public function test_withCompOp() {
-		global $typeOfVars;
-		$resExpression = "a || b";
-		$expectedExpression = " a || b";
-		$resTree = buildTree($resExpression, $typeOfVars);
-		$expectedTree = buildTree($expectedExpression, $typeOfVars);
-		
-		$resTree->convertQuineMcCluskey();
-		
-		$this->assertEquals(isTreeEqual($resTree, $expectedTree, TRUE), "in mini test tree not equal");
-		
-	}
-	
-	public function test_mixedType() {
-		global $typeOfVars;
-		$resExpression = "a || b";
-		$expectedExpression = " a || b";
-		$resTree = buildTree($resExpression, $typeOfVars);
-		$expectedTree = buildTree($expectedExpression, $typeOfVars);
-		
-		$resTree->convertQuineMcCluskey();
-		
-		$this->assertEquals(isTreeEqual($resTree, $expectedTree, TRUE), "in mini test tree not equal");
-		
-	}
-	
-	public function test_testEqual1() {
-		
-	}
-	
-	
-	public static function tearDownAfterClass() {
-		
-	}
 }
 
 ?>
