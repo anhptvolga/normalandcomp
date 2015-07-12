@@ -64,7 +64,50 @@ abstract class KDimNode extends BaseNode {
 class PlusOperator extends KDimNode {
 	
 	public function convert($parent) {
-
+		// 1.	Проверка каждого его сына: 
+		//		его сын – операция сложения то добавить его сыновья вверх – вызов 
+		$this->goUpChildren();
+		
+		// 2.	Вызов функции преобразования каждого его сына.
+		//		Снова вызов goUpChildren
+		$this->convertEachChildrens();
+		$this->goUpChildren();
+		
+		// 3.	Вычислить константу: сложение констант в списке сыновьей.
+		$value = 0;								// новое значение
+		$isAdd = FALSE;							// флаг что есть ли константа
+		for ($i = 0; $i < count($this->childrens); $i ++){
+			// Если сын - это операция
+			if (get_class($this->childrens[$i]) == 'Operand') {
+				// Если сын - это констнатна
+				if ($this->childrens[$i]->number !== null) {
+					// добавить значение
+					$value += $this->childrens[$i]->number;
+					// удалить этот сын из списка сыновей
+					array_splice($this->childrens, $i, 1);
+					$i--;	
+					// установить флаг
+					$isAdd = TRUE;
+				}
+			}
+		}
+		
+		// Если есть константа и ее значение не равно нулю
+		if ($isAdd && $value != 0) {
+			// создать новую константу
+			$tmp = new Operand(strval($value), $value);
+			$tmp->calculateTreeInString();
+			// добавлять в список сыновей
+			array_push($this->childrens, $tmp);
+		}
+		
+		// 4.	Сортировать сыновей – вызов функция sortChildrens
+		$this->sortChildrens();
+		
+		// 5.	Если в списке сыновей только один сын то узел преобразуется в вид его сын
+		if (count($this->childrens) == 1)	{
+			$this->pToNewChild = $this->childrens[0];
+		}
 	}
 	
 }
@@ -72,19 +115,152 @@ class PlusOperator extends KDimNode {
 class MultiOperator extends KDimNode {
 	
 	public function convert($parent) {
+		$isHavePlus = FALSE;
+		$isAdd = FALSE;
 		
+		// 1.	Проверка каждого его сына: 
+		//		его сын – операция сложения то добавить его сыновья вверх – вызов goUpChildren
+		$this->goUpChildren();
+		// 2.	Вызов функции преобразования каждого его сына.
+		//		снова сыновья вверх – вызов goUpChildren
+		$this->convertEachChildrens();
+		$this->goUpChildren();
+		// 3.	Вычислить константу: сложение констант в списке сыновьей.
+		$value = calculateConst($isHavePlus, $isAdd);
+		// сортировать сыновья
+		$this->sortChildrens();
+		// преобразовать дробей
+		$this->convertDivInMult();
+		// сортировать сыновья
+		$this->sortChildrens();
+		// если есть операция сложения то раскрывать скобки
+		if ($isHavePlus) {
+			$openedSum = $this->openBracket();
+			$this->pToNewChild = $openedSum;
+			return;
+		}
+		// если только 1 сын то преобразовать в вид только его
+		if (count($this->childrens) == 1) {
+			$this->pToNewChild = $this->childrens[0];
+			return;
+		}
+		// проверка знак
+		$numOfNegative = countNegative($value);				// число операнд отрицательно
+		// если нечетно то добавляем знак унарный минус
+		if ($numOfNegative % 2 == 1) {
+			$tmp = new UnaryMinusOperator();
+			$tmp->children = $this;
+			$tmp->calculateTreeInString();
+			$this->pToNewChild = $tmp;
+			return;
+		}
+		// дублировать сыны
+		if ($isAdd) {
+			$this->duplicateChild($value);
+		}
 	}
 	
 	public function calculateConst(&$isHavePlus, &$isAdd) {
-		
+		$value = 1;						// произведение целых констант
+		$dvalue = 1;						// произведение вещественных констант
+		$isdAdd = FALSE;					// флаг есть ли вещественных констант
+		// для каждого сына
+		for ($i = 0; $i < count($this->childrens); $i++) {
+			// проверка есть ли операция сложения
+			if (get_class($this->childrens[$i]) == 'PlusOperator')
+				$isHavePlus = TRUE;
+			// вычисление констант
+			if (get_class($this->childrens[$i]) == 'Operand') {
+				if (is_int($this->childrens[$i]->number)) {
+					$value *= $this->childrens[$i]->number;
+					array_splice($this->childrens, $i, 1);
+					$i--;
+					$isAdd = true;
+				}
+				elseif (is_double($this->childrens[$i]->number)) {
+					$dvalue *= $this->childrens[$i]->number;
+					array_splice($this->childrens, $i, 1);
+					$i--;
+					$isdAdd = true;
+				}
+			}
+		}
+	
+		if ($isAdd) {
+			// создать новую константу
+			$tmp = new Operand(strval($value), $value);
+			$tmp->calculateTreeInString();
+			// добавлять в список сыновей
+			array_push($this->childrens, $tmp);
+		}
+		if ($isdAdd) {
+			// создать новую константу
+			$tmp = new Operand(strval($dvalue), $dvalue);
+			$tmp->calculateTreeInString();
+			// добавлять в список сыновей
+			array_push($this->childrens, $tmp);
+		}
+		return $value;
 	}
 	
 	public function countNegative(&$value) {
-		
+		$numOfNegative = 0;			// результат
+		for ($i = 0; $i < count($this->childrens); $i++) {
+			if (get_class($this->childrens[$i]) == 'UnaryMinusOperator') {
+				++$numOfNegative;
+				$this->childrens[$i] = $this->childrens[$i]->children;
+			}
+			elseif (get_class($this->childrens[$i]) == 'Operand' &&
+				$this->childrens[$i]->number !== null &&
+				$this->childrens[$i]->number < 0) {
+				++$numOfNegative;
+				$this->childrens[$i]->number =  - $this->childrens[$i]->number;
+				$this->childrens[$i]->name = strval($this->childrens[$i]->number);
+				if (is_int($this->childrens[$i]->number))
+					$value = -$value;
+			}
+	
+		}
+		return numOfNegative;
 	}
 	
 	public function duplicateChild($value) {
+		$toDup = array();
+		for ($i = 0; $i < count($this->childrens); $i++) {
+			if (get_class($this->childrens[$i]) == 'Operand') {
+				if ($this->childrens[$i]->number == null || is_double($this->childrens[$i]->number)) { 
+					array_push($toDup, $this->childrens[$i]);
+				}
+			}
+			if (get_class($this->childrens[$i]) != 'Operand')
+				array_push($toDup, $this->childrens[$i]);
+		}
+		// создать сын для добавления
+		$childToAdd;
+		if (count($toDup) == 1) {
+			$childToAdd = $toDup[0];
+		}
+		else {
+			$childToAdd = new MultiOperator();
+			$childToAdd->childrens = $toDup;
+			$childToAdd->calculateTreeInString();
+		}
+		// преобразовать в PlusOperator
+		$tmp = new PlusOperator();
+		for ($i = 0; $i < abs($value); $i++) {
+			array_push($tmp->childrens, $childToAdd);
+		}
+		$tmp->calculateTreeInString();
 		
+		// добавление знак
+		if ($value < 0) {
+			$t = new UnaryMinusOperator();
+			$t->children = $tmp;
+			$t->calculateTreeInString();
+			$this->pToNewChild = $t;
+		}
+		else
+			$this->pToNewChild = $tmp;
 	}
 	
 	public function convertDivInMult()	{
@@ -160,7 +336,45 @@ class MultiOperator extends KDimNode {
 class AndLogicOperator extends KDimNode {
 	
 	public function convert($parent) {
+		// преобразуем каждый сын
+		$this->convertEachChildrens();
+	
+		// При использовании логической операции И одинаковых операндов, 
+		// преобразуется в вид только операнд
+		$isAllNot = TRUE;
+		for ($i = 0; $i < count($this->childrens); $i++) {
+			if (get_class($this->childrens[$i]) != 'NotLogicOperator')
+				$isAllNot = FALSE;
+			for ($j = $i + 1; $j < count($this->childrens); $j++) {
+				// если одинаковые то удалить один узел
+				if ($this->isTreeEqual($this->childrens[$i], $this->childrens[$j])) {
+					array_splice($this->childrens, $i, 1);
+					$j--;
+				}
+			}
+		}
 		
+		// если отстаться только 1 узел то преобразуем в виде только сын
+		if (count($this->childrens) == 1) {
+			$this->pToNewChild = $this->childrens[0];
+			return;
+		}
+		
+		// если все операнды - операция ! то преобразовать в вид  операции ||
+		if ($isAllNot) {
+			$newChild = new OrLogicOperator();
+			for ($i = 0; $i < count($this->childrens); $i++)
+				array_push($newChild->childrens, $this->childrens[$i]->children);
+			$newChild->calculateTreeInString();
+			
+			$tmp = new NotLogicOperator();
+			$tmp->children = $newChild;
+			$tmp->calculateTreeInString();
+			$pToNewChild = $tmp;
+			return;
+		}
+		// сортировать сыновья
+		$this->sortChildrens();
 	}
 	
 }
@@ -169,7 +383,35 @@ class AndLogicOperator extends KDimNode {
 class OrLogicOperator extends KDimNode {
 	
 	public function convert($parent) {
-		
+		// преобразуем каждый сын
+		$this->convertEachChildrens();
+		// удалить одинаковые узлы
+		$vtemp = array();			// список новых сыновей после удаления
+		for ($i = 0; $i < count($this->childrens); $i++) {
+			$isAdd = TRUE;
+			$j = 0;
+			// проверка текущего узла был ли раньше
+			while ($isAdd && $j < count($vtemp)) {
+				if (isTreeEqual($this->childrens[$i], $vtemp[$j])) {
+					$isAdd = false;
+				}
+				++$j;
+			}
+			// если не был то добавляем
+			if ($isAdd)	{
+				array_push($vtemp, $this->childrens[$i]);
+			}
+		}
+		// присваивать новый список сыновей
+		$this->childrens = $vtemp;
+		// преобразуем сравнений операций в вид >=, <=
+		$this->reduceCompare();
+		// преобразуем каждый сын
+		$this->convertEachChildrens();
+		// сортируем сыновья
+		$this->sortChildrens();
+		// преобразуем в МДНФ 
+		$this->convertQuineMcCluskey();
 	}
 	
 	public function isChildsSame($one, $two) {
@@ -400,8 +642,8 @@ class OrLogicOperator extends KDimNode {
 			}
 			$eachChild = $tmp;
 		}
-		// удалить лишный
 		
+		// удалить лишный
 		$isDel = FALSE;
 		$i = 0;
 		while ($i < count($eachChild) && !$isDel)
