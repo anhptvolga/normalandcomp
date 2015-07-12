@@ -28,6 +28,12 @@ abstract class BinaryNode extends BaseNode {
 		}
 	}
 	
+	public function calculateTreeInString() {
+		$this->treeInString = $this->getLabel(get_class($this))." ";
+		$this->treeInString .= $this->left->treeInString." ";
+		$this->treeInString .= $this->right->treeInString." ";	
+	}
+	
 }
 
 ////////////////////////////////////////////////////////

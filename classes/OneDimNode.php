@@ -18,6 +18,10 @@ abstract class OneDimNode extends BaseNode {
 		}
 	}
 	
+	public function calculateTreeInString() {
+		$this->treeInString = $this->getLabel(get_class($this))." ".$this->children->treeInString;	
+	}
+	
 }
 
 /////////////////////////////////////////////////////////////////////

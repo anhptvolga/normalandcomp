@@ -25,6 +25,10 @@ class Operand extends BaseNode {
 		
 	}
 	
+	public function calculateTreeInString() {
+		$this->treeInString = $this->name;	
+	}
+	
 }
 
 ?>

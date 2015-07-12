@@ -22,7 +22,6 @@ abstract class KDimNode extends BaseNode {
 	}
 	
 	public function goUpChildrens() {
-		
 		for ($i = 0; $i < count($this->childrens); $i ++) {
 			if (get_class($this) == get_class($this->childrens[$i])) {
 				
@@ -48,6 +47,14 @@ abstract class KDimNode extends BaseNode {
 				$children->convert($this);
 			}	
 		}	
+	}
+	
+	public function calculateTreeInString() {
+		$this->treeInString = $this->getLabel(get_class($this)).' ';
+		
+		foreach ($this->childrens as $value) {
+			$this->treeInString .= $value->treeInString.' ';
+		}
 	}
 	
 }
