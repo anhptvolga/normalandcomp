@@ -41,7 +41,7 @@ abstract class KDimNode extends BaseNode {
 			// convert each children
 			$children->convert($this);
 			while ($children->pToNewChild !== null) {
-				$tmp = $this->children;
+				$tmp = $children;
 				$children = $children->pToNewChild;
 				$children->pToNewChild = null;
 				$children->convert($this);
@@ -66,12 +66,12 @@ class PlusOperator extends KDimNode {
 	public function convert($parent) {
 		// 1.	Проверка каждого его сына: 
 		//		его сын – операция сложения то добавить его сыновья вверх – вызов 
-		$this->goUpChildren();
+		$this->goUpChildrens();
 		
 		// 2.	Вызов функции преобразования каждого его сына.
 		//		Снова вызов goUpChildren
 		$this->convertEachChildrens();
-		$this->goUpChildren();
+		$this->goUpChildrens();
 		
 		// 3.	Вычислить константу: сложение констант в списке сыновьей.
 		$value = 0;								// новое значение
@@ -120,13 +120,13 @@ class MultiOperator extends KDimNode {
 		
 		// 1.	Проверка каждого его сына: 
 		//		его сын – операция сложения то добавить его сыновья вверх – вызов goUpChildren
-		$this->goUpChildren();
+		$this->goUpChildrens();
 		// 2.	Вызов функции преобразования каждого его сына.
 		//		снова сыновья вверх – вызов goUpChildren
 		$this->convertEachChildrens();
-		$this->goUpChildren();
+		$this->goUpChildrens();
 		// 3.	Вычислить константу: сложение констант в списке сыновьей.
-		$value = calculateConst($isHavePlus, $isAdd);
+		$value = $this->calculateConst($isHavePlus, $isAdd);
 		// сортировать сыновья
 		$this->sortChildrens();
 		// преобразовать дробей
@@ -145,7 +145,7 @@ class MultiOperator extends KDimNode {
 			return;
 		}
 		// проверка знак
-		$numOfNegative = countNegative($value);				// число операнд отрицательно
+		$numOfNegative = $this->countNegative($value);				// число операнд отрицательно
 		// если нечетно то добавляем знак унарный минус
 		if ($numOfNegative % 2 == 1) {
 			$tmp = new UnaryMinusOperator();
@@ -221,7 +221,7 @@ class MultiOperator extends KDimNode {
 			}
 	
 		}
-		return numOfNegative;
+		return $numOfNegative;
 	}
 	
 	public function duplicateChild($value) {
