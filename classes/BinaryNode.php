@@ -114,7 +114,7 @@ class PowFunction extends BinaryNode {
 				$newNode = new MultiOperator();
 				// присваивать значения нового узла
 				for ($i = 0; $i < $this->right->number; $i++)
-					array_push($newNode->childrens, $this->left);
+					array_push($newNode->childrens, clone $this->left);
 				$newNode->calculateTreeInString();
 				$this->pToNewChild = $newNode;
 			}
@@ -178,18 +178,18 @@ class EqualOperator extends BinaryNode {
 		$t->children = $this->right;
 		$t->calculateTreeInString();
 		array_push($tmp->childrens, $this->left);
-		array_push($tmp->childrens, $this->t);
+		array_push($tmp->childrens, $t);
 		$tmp->calculateTreeInString();
 		$this->left = $tmp;
 		$this->right = new Operand("0", 0);
 	
 		// преобразовать левый сын
-		$this->left->pToNewChild = NULL;
-		$this->left->convert(this);
-		while ($this->left->pToNewChild != NULL) {
+		$this->left->pToNewChild = null;
+		$this->left->convert($this);
+		while ($this->left->pToNewChild !== null) {
 			$this->left = $this->left->pToNewChild; 
-			$this->left->pToNewChild = NULL;
-			$this->left->convert(this);
+			$this->left->pToNewChild = null;
+			$this->left->convert($this);
 		}
 		$this->left->calculateTreeInString();
 	}
@@ -242,7 +242,7 @@ class ShiftRightOperator extends BinaryNode {
 		$this->convertEachChildrens();
 		// если целая константа то преобразовать в деление
 		if (get_class($this->right) == 'Operand' &&
-			$this->right->number != null) {
+			$this->right->number !== null) {
 			$tmp = new DivOperator();
 			$tmp->left = $this->left;
 			$this->right->number = pow(2, $this->right->number);
@@ -260,12 +260,12 @@ class ShiftLeftOperator extends BinaryNode {
 		// преобразовать каждый сын
 		$this->convertEachChildrens();
 		// если целая константа то преобразовать в вид умножение
-		if (get_class($this->right) == 'Operand' &&
-			$this->right->number != null) {
+		if (get_class($this->right) === 'Operand' &&
+			$this->right->number !== null) {
 			$tmp = new MultiOperator();
 			array_push($tmp->childrens, $this->left);
 			$this->right->number = pow(2, $this->right->number);
-			$this->right->name = strval($this->right);
+			$this->right->name = strval($this->right->number);
 			$this->right->treeInString = $this->right->name;
 			array_push($tmp->childrens, $this->right);
 			$tmp->calculateTreeInString();
@@ -292,7 +292,7 @@ class GreaterEqualOperator extends BinaryNode {
 		// преобразовать в вид больше
 		$gt = new GreaterOperator();
 	
-		$gt->right = Operand("0", 0);
+		$gt->right = new Operand("0", 0);
 		$gt->left = $tmp;
 		$gt->calculateTreeInString();
 		
@@ -318,15 +318,15 @@ class GreaterOperator extends BinaryNode {
 		array_push($tmp->childrens, $t);
 	
 		$this->left = $tmp;
-		$this->right = Operand("0", 0);
-		
+		$this->right = new Operand("0", 0);
+		//var_dump($this->left);
 		// преобразовать новый сын
-		$this->left->pToNewChild = NULL;
-		$this->left->convert(this);
-		while ($this->left->pToNewChild != NULL) {
+		$this->left->pToNewChild = null;
+		$this->left->convert($this);
+		while ($this->left->pToNewChild !== null) {
 			$this->left = $this->left->pToNewChild;
-			$this->left->pToNewChild = NULL;
-			$this->left->convert(this);
+			$this->left->pToNewChild = null;
+			$this->left->convert($this);
 		}
 		$this->left->calculateTreeInString();
 	}
@@ -339,9 +339,9 @@ class LessEqualOperator extends BinaryNode {
 		$this->convertEachChildrens();
 		// преобразовать в вид >=
 		$tmp = new GreaterEqualOperator();
-		$this->tmp->left = $this->right;
-		$this->tmp->right = $this->left;
-		$this->tmp->calculateTreeInString();
+		$tmp->left = $this->right;
+		$tmp->right = $this->left;
+		$tmp->calculateTreeInString();
 		$this->pToNewChild = $tmp;
 	}
 }
@@ -349,7 +349,7 @@ class LessEqualOperator extends BinaryNode {
 class LessOperator extends BinaryNode {
 	
 	public function convert($parent) {
-		convertEachChildrens();
+		$this->convertEachChildrens();
 	
 		// преобразовать в вид >
 		$gt = new GreaterOperator();
@@ -367,7 +367,7 @@ class PlusAssignOperator extends BinaryNode {
 		$this->convertEachChildrens();
 		
 		$tmp = new PlusOperator();
-		array_push($tmp->childrens, $this->left);
+		array_push($tmp->childrens, clone $this->left);
 		array_push($tmp->childrens, $this->right);
 		$tmp->calculateTreeInString();
 		
@@ -386,7 +386,7 @@ class MinusAssignOperator extends BinaryNode {
 		$this->convertEachChildrens();
 		
 		$tmp = new MinusOperator();
-		$tmp->left = $this->left;
+		$tmp->left = clone $this->left;
 		$tmp->right = $this->right;
 		$tmp->calculateTreeInString();
 		
@@ -405,7 +405,7 @@ class DivAssignOperator extends BinaryNode {
 		$this->convertEachChildrens();
 		
 		$tmp = new DivOperator();
-		$tmp->left = $this->left;
+		$tmp->left = clone $this->left;
 		$tmp->right = $this->right;
 		$tmp->calculateTreeInString();
 		
@@ -424,7 +424,7 @@ class MultiAssignOperator extends BinaryNode {
 		$this->convertEachChildrens();
 		
 		$tmp = new MultiOperator();
-		array_push($tmp->childrens, $this->left);
+		array_push($tmp->childrens, clone $this->left);
 		array_push($tmp->childrens, $this->right);
 		$tmp->calculateTreeInString();
 		
@@ -443,7 +443,7 @@ class ShrAssignOperator extends BinaryNode {
 		$this->convertEachChildrens();
 		
 		$tmp = new ShiftRightOperator();
-		$tmp->left = $this->left;
+		$tmp->left = clone $this->left;
 		$tmp->right = $this->right;
 		$tmp->calculateTreeInString();
 		
@@ -462,7 +462,7 @@ class ShlAssignOperator extends BinaryNode {
 		$this->convertEachChildrens();
 		
 		$tmp = new ShiftLeftOperator();
-		$tmp->left = $this->left;
+		$tmp->left = clone $this->left;
 		$tmp->right = $this->right;
 		$tmp->calculateTreeInString();
 		

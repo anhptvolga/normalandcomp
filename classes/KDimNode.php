@@ -163,7 +163,7 @@ class MultiOperator extends KDimNode {
 		// если нечетно то добавляем знак унарный минус
 		if ($numOfNegative % 2 == 1) {
 			$tmp = new UnaryMinusOperator();
-			$tmp->children = $this;
+			$tmp->children = clone $this;
 			$tmp->calculateTreeInString();
 			$this->pToNewChild = $tmp;
 			return;
@@ -242,7 +242,7 @@ class MultiOperator extends KDimNode {
 		$toDup = array();
 		for ($i = 0; $i < count($this->childrens); $i++) {
 			if (get_class($this->childrens[$i]) == 'Operand') {
-				if ($this->childrens[$i]->number == null || is_double($this->childrens[$i]->number)) { 
+				if ($this->childrens[$i]->number === null || is_double($this->childrens[$i]->number)) { 
 					array_push($toDup, $this->childrens[$i]);
 				}
 			}
@@ -262,7 +262,7 @@ class MultiOperator extends KDimNode {
 		// преобразовать в PlusOperator
 		$tmp = new PlusOperator();
 		for ($i = 0; $i < abs($value); $i++) {
-			array_push($tmp->childrens, $childToAdd);
+			array_push($tmp->childrens, clone $childToAdd);
 		}
 		$tmp->calculateTreeInString();
 		
@@ -296,11 +296,11 @@ class MultiOperator extends KDimNode {
 			$newch = new DivOperator();
 			$newch->left = new Operand("1", 1, VarType::INT);
 			$newch->right = $tmp;
-			
-			array_push($divop, $newch);
+			$newch->calculateTreeInString();
+			$divop = array($newch);
 		}
 		// возвращать в списку сыновей
-		foreach ($divop as $key => $value) {
+		foreach ($divop as $value) {
 			array_push($this->childrens, $value);
 		}
 	}
@@ -326,7 +326,7 @@ class MultiOperator extends KDimNode {
 			// создать узел умножения
 			$cur = new MultiOperator();
 			for ($i = 0; $i < count($multElements); $i++) {
-				array_push($cur->childrens, $multElements[$i][$conf[$i]]);
+				array_push($cur->childrens, clone $multElements[$i][$conf[$i]]);
 			}
 			array_push($res->childrens, $cur);
 			
@@ -357,11 +357,12 @@ class AndLogicOperator extends KDimNode {
 		// преобразуется в вид только операнд
 		$isAllNot = TRUE;
 		for ($i = 0; $i < count($this->childrens); $i++) {
-			if (get_class($this->childrens[$i]) != 'NotLogicOperator')
+			if (get_class($this->childrens[$i]) != 'NotLogicOperator') {
 				$isAllNot = FALSE;
+			}
 			for ($j = $i + 1; $j < count($this->childrens); $j++) {
 				// если одинаковые то удалить один узел
-				if ($this->isTreeEqual($this->childrens[$i], $this->childrens[$j])) {
+				if (isTreeEqual($this->childrens[$i], $this->childrens[$j])) {
 					array_splice($this->childrens, $i, 1);
 					$j--;
 				}
@@ -378,13 +379,13 @@ class AndLogicOperator extends KDimNode {
 		if ($isAllNot) {
 			$newChild = new OrLogicOperator();
 			for ($i = 0; $i < count($this->childrens); $i++)
-				array_push($newChild->childrens, $this->childrens[$i]->children);
+				array_push($newChild->childrens, clone $this->childrens[$i]->children);
 			$newChild->calculateTreeInString();
 			
 			$tmp = new NotLogicOperator();
 			$tmp->children = $newChild;
 			$tmp->calculateTreeInString();
-			$pToNewChild = $tmp;
+			$this->pToNewChild = $tmp;
 			return;
 		}
 		// сортировать сыновья
@@ -435,13 +436,13 @@ class OrLogicOperator extends KDimNode {
 		// проверка левого сына а с обратном знаком
 		$tmp = new UnaryMinusOperator();
 		// создать унарный минус
-		$tmp->children = $one->left;
+		$tmp->children = clone $one->left;
 		// преобразовать новый узел
-		$tmp->pToNewChild = NULL;
+		$tmp->pToNewChild = null;
 		$tmp->convert(tmp);
-		while ($tmp->pToNewChild != NULL) {
+		while ($tmp->pToNewChild !== null) {
 			$tmp = $tmp->pToNewChild;
-			$tmp->pToNewChild = NULL;
+			$tmp->pToNewChild = null;
 			$tmp->convert(tmp);
 		}
 		// сравнение сына a с обратном знаком
@@ -451,15 +452,15 @@ class OrLogicOperator extends KDimNode {
 	public function reduceCompare()	{
 		$vtemp = array();		// временной вектор сыновей
 		// нахождение сравнения можно сокращать
-		for ($i = 0; $i < count(childrens); $i++) {
-			if ($this->childrens[$i] != NULL) {
+		for ($i = 0; $i < count($this->childrens); $i++) {
+			if ($this->childrens[$i] !== null) {
 				$isAdd = TRUE;			// флаг : добавить текущий узел в временной вектор
 				$lnode;					// указатель на узел сравнение 
 				$enode;					// указатель на узел равенства
 				for ($j = $i + 1; $j < count($this->childrens) && $isAdd; $j++) {
 					$isComp = FALSE;		// флаг: нашлось ли узлы для сокращения
 					if (get_class($this->childrens[$i]) == 'GreaterOperator' &&
-						get_class($this->childrens[$j]) == 'NodeType::EqualOperator') {
+						get_class($this->childrens[$j]) == 'EqualOperator') {
 						$isComp = TRUE;
 						$lnode = $this->childrens[$i];
 						$enode = $this->childrens[$j];
@@ -483,7 +484,7 @@ class OrLogicOperator extends KDimNode {
 						$enode = $this->childrens[$i];
 					}
 					// проверка можно ли сокращать
-					if ($isComp && isChildsSame($lnode, $enode)){
+					if ($isComp && $this->isChildsSame($lnode, $enode)){
 						// создать новый узел
 						if (get_class($lnode) == 'LessOperator')
 							$tmp = new LessEqualOperator();
@@ -497,7 +498,7 @@ class OrLogicOperator extends KDimNode {
 						// добавить в временной вектор сыновей
 						array_push($vtemp, $tmp);
 						// удалить из вектора сыновей
-						$this->childrens[$i] = $this->childrens[$j] = NULL;
+						$this->childrens[$i] = $this->childrens[$j] = null;
 					}
 	
 				}
@@ -727,10 +728,10 @@ class OrLogicOperator extends KDimNode {
 					$pos = $this->find_first_not_of($eachChild[$i],'-');
 					if ($pos != -1) {
 						if ($eachChild[$i][$pos] == '1')
-							array_push($this->childrens, $fullExp[$pos]);
+							array_push($this->childrens, clone $fullExp[$pos]);
 						else {
 							$tmp = new NotLogicOperator();
-							$tmp->children = $fullExp[$pos];
+							$tmp->children = clone $fullExp[$pos];
 							array_push($this->childrens, $tmp);
 							$tmp->calculateTreeInString();
 						}
@@ -741,11 +742,11 @@ class OrLogicOperator extends KDimNode {
 					$tmp = new AndLogicOperator();
 					for ($j = 0; $j < strlen($eachChild[$i]); $j++) {
 						if ($eachChild[$i][$j] == '1') {
-							array_push($tmp->childrens, $fullExp[$j]);
+							array_push($tmp->childrens, clone $fullExp[$j]);
 						}
 						elseif ($eachChild[$i][$j] == '0') {
 							$notOp = new NotLogicOperator();
-							$notOp->children = $fullExp[$j];
+							$notOp->children = clone $fullExp[$j];
 							$notOp->calculateTreeInString();
 							array_push($tmp->childrens, $notOp);
 						}

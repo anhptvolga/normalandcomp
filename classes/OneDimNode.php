@@ -47,7 +47,7 @@ class UnaryMinusOperator extends OneDimNode {
 		}
 		//--
 		if (get_class($this->children) == 'Operand' &&
-				$this->children->number != null) {
+				$this->children->number !== null) {
 			$this->children->number = - $this->children->number;
 			$this->children->name = strval($this->children->number);
 			$this->children->treeInString = $this->children->name;
