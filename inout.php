@@ -16,115 +16,19 @@ require_once($CFG->dirroot .'/blocks/normalandcomp/classes/KDimNode.php');
 require_once($CFG->dirroot .'/blocks/normalandcomp/classes/BinaryNode.php');
 require_once($CFG->dirroot .'/blocks/normalandcomp/classes/Operand.php');
 
-$typeOfVars = array();
-
-
-
-class block_formal_langs_tree_dot_representation
-{
-    /**
-     * Constructs new empty graph
-     */
-    public function __construct() {
-        $this->nodes = array();
-        $this->edges = array();
-    }
-
-    /**
-     * Adds new node to graph
-     * @param string $text a text for node
-     * @return int index
-     */
-    public function push_node($text) {
-        $id = count($this->nodes);
-        $this->nodes[] = $text;
-        return $id;
-    }
-
-    /**
-     * Adds new edge to graph
-     * @param int $from a starting node index
-     * @param int $to an ending node index
-     */
-    public function push_edge($from, $to) {
-        $this->edges[] = array($from, $to);
-    }
-
-    /**
-     * Converts everything to dot
-     * @return string data in dot representation
-     */
-    public function to_dot() {
-        $string = 'digraph G {' . PHP_EOL;
-        foreach($this->nodes as $k => $v)
-        {
-            $string .=  '    node_' . $k . ' [ shape=box label="' . str_replace('"', '\\"', $v) . '" ]' . PHP_EOL;
-        }
-        foreach($this->edges as $edge)
-        {
-            $string .=  '    node_' . $edge[0] . ' -> node_' . $edge[1] . PHP_EOL;
-        }
-        $string .= '}';
-        return $string;
-    }
-
-    /**
-     * Строит данные по результатам
-     * @param array|block_formal_langs_ast_node_base $node вершины
-     * @return int id самой верхней вершины
-     */
-    public function build_tree($node) {
-        if (is_array($node)) {
-            foreach($node as $child) {
-                $this->build_tree($child);
-            }
-            return 0;
-        } else {
-            if (is_a($node, 'block_formal_langs_ast_node_base')) {
-                $text = 0;
-                if (count($node->childs()) == 0 && method_exists($node, 'value')) {
-                    //$text = $node->value();
-					$text = $node->type()."\n".$node->value();
-                } else {
-                    $classname = get_class($node);
-                    $text = $node->type();
-                    if ($classname != 'block_formal_langs_ast_node_base' && $classname != 'block_formal_langs_token_base')
-                    {
-                        $text .= '(' . $classname . ')';
-                    }
-                }
-
-                $myid = $this->push_node($text);
-                if (count($node->childs())) {
-                    foreach($node->childs() as $child) {
-                        $nodeid = $this->build_tree($child);
-                        $this->push_edge($myid, $nodeid);
-                    }
-                }
-                return $myid;
-            } else {
-                return $this->push_node(var_export($node, true));
-            }
-        }
-    }
-
-    /**
-     * A list of nodes texts, indexed as lists
-     * @var array
-     */
-    protected  $nodes;
-    /**
-     * A list of edges, as array of node indexes
-     * @var
-     */
-    protected $edges;
-};
-
-
+/*!
+ * Печать дерево в формат DOT
+ *
+ * \param [in] file указатель на выходный файл
+ * \param [in] curNode указатель на текущий узел
+ * 
+ */
 function printTreeToDOT($file, $curNode) {
-	static $globalid = 0;
-	$id = $globalid;
+	static $globalid = 0;			// следующий идентификатор для узлов
+	$id = $globalid;				// идентификатор для данный узла
+	// инкремент общий индетификатор
 	++$globalid;
+	// печать определение для данного узла
 	if (is_a($curNode, 'Operand')){
 		fwrite($file, $id.' [label = '.$curNode->name);
 	}
@@ -132,19 +36,20 @@ function printTreeToDOT($file, $curNode) {
 		fwrite($file, $id.' [label = "'.$curNode->getLabel(get_class($curNode)).'"');
 	}
 	fwrite($file,"]\n");
-	if (is_subclass_of($curNode, 'OneDimNode')) {
+	// переход на сыновья
+	if (is_subclass_of($curNode, 'OneDimNode')) {			// унарный узел
 		$next = $globalid;
 		printTreeToDOT($file, $curNode->children);
 		fwrite($file, $id.' -> '.$next."\n");
 	}
-	elseif (is_subclass_of($curNode, 'KDimNode')) {
+	elseif (is_subclass_of($curNode, 'KDimNode')) {			// двоичной узел
 		foreach ($curNode->childrens as $value) {
 			$next = $globalid;
 			printTreeToDOT($file, $value);
 			fwrite($file, $id.' -> '.$next."\n");
 		}
 	}
-	elseif (is_subclass_of($curNode, 'BinaryNode')) {
+	elseif (is_subclass_of($curNode, 'BinaryNode')) {		// k-dim узел
 		$next = $globalid;
 		printTreeToDOT($file, $curNode->left);
 		fwrite($file, $id.' -> '.$next."\n");
@@ -155,9 +60,19 @@ function printTreeToDOT($file, $curNode) {
 }
 
 
+/*!
+ * \brief Функция сравнения двух деревьев
+ *
+ * \param [in] tree1 указатель на узел первого дерева
+ * \param [in] tree2 указатель на узел второго дерева
+ * \param [in] isPrintDiff флаг: печать ли разницы двух деревьев
+ * \return true если два дерева равны, в противном случае false
+ * 
+ */
 function isTreeEqual($tree1, $tree2, $isPrintDiff = FALSE) {
 	
 	if (get_class($tree1) != get_class($tree2)) {
+		// печать разницы при тестировать	
 		if($isPrintDiff){
 			echo "____ type of node diff\n";
 			echo "__________ result = ".get_class($tree1)."\n";
@@ -165,8 +80,9 @@ function isTreeEqual($tree1, $tree2, $isPrintDiff = FALSE) {
 		}
 		return false;
 	}
-	if (is_a($tree1, 'Operand')){
+	if (is_a($tree1, 'Operand')){							// операнд
 		if ($tree1->name != $tree2->name){
+			// печать разницы при тестировать
 			if ($isPrintDiff){
 				echo "____ name of operand diff\n";
 				echo "__________ result = ".$tree1->name."\n";
@@ -175,6 +91,7 @@ function isTreeEqual($tree1, $tree2, $isPrintDiff = FALSE) {
 			return false;
 		}
 		if ($tree1->number != $tree2->number){
+			// печать разницы при тестировать
 			if ($isPrintDiff){
 				echo "____ number of operand diff\n";
 				echo "__________ result = ".$tree1->number."\n";
@@ -183,14 +100,14 @@ function isTreeEqual($tree1, $tree2, $isPrintDiff = FALSE) {
 			return false;
 		}
 	}
-	elseif (is_subclass_of($tree1, 'OneDimNode')) {
+	elseif (is_subclass_of($tree1, 'OneDimNode')) {				// унарный
 		return isTreeEqual($tree1->children, $tree2->children, $isPrintDiff);
 	}
-	elseif (is_subclass_of($tree1, 'BinaryNode')) {
+	elseif (is_subclass_of($tree1, 'BinaryNode')) {				// бинарный
 		return isTreeEqual($tree1->left, $tree2->left, $isPrintDiff) &&
 				isTreeEqual($tree1->right, $tree2->right, $isPrintDiff);
 	}
-	elseif (is_subclass_of($tree1, 'KDimNode')) {
+	elseif (is_subclass_of($tree1, 'KDimNode')) {				// k-dim
 		$res = count($tree1->childrens) == count($tree2->childrens);
 		$i = 0;
 		while ($res && $i < count($tree1->childrens)) {
@@ -203,30 +120,24 @@ function isTreeEqual($tree1, $tree2, $isPrintDiff = FALSE) {
 	return TRUE;
 }
 
-function readExp($filename, &$exp1, &$exp2) {
-	$filename = '..\testinput\expession.txt';
+function readExp($filename) {
+	//$filename = '..\testinput\expession.txt';
 	$file = fopen($filename, "r");
 	if ($file !== FALSE) {
-		$exp1 = fgets($file);
-		$exp2 = fgets($file);
+		$res = fgets($file);
 		fclose($file);
 	}
 	else {
-		throw new Exception("file input not found");
+		throw new Exception("file not found");
 	}
-	
-	if (strlen($exp1) == 0) {
-		throw new Exception("No expession in file");
-	}
-	if (strlen($exp2) == 0) {
-		throw new Exception("Only one expression in file");
-		
+	if (strlen($res) == 0) {
+		throw new Exception("no expession in file");
 	}
 }
 
 /**
  * Функция для создания экземплю узла по именю класса
-*/
+ */
 function getInstane($classname) {
 	switch ($classname) {
 		case 'identifier':
@@ -298,10 +209,9 @@ function getInstane($classname) {
 }
 
 /**
-	 * Функция для создания дерева от лексического дерева
-	 */
-function filter_node($node)
-{
+ * Функция для создания дерева от лексического дерева
+ */
+function filter_node($node)  {
 	$curNode = null;						// указатель на текущий узел
 	$nodetype = $node->type();				// тип узла
 	
@@ -321,7 +231,7 @@ function filter_node($node)
 	elseif ($nodetype === 'expr_function_call') {			// pow() функция
 		if ($node->childs[0]->value() != 'pow') {
 			$fname = $node->childs[0]->value();
-			throw new Exception("Funtion $fname not suported");
+			throw new Exception("funtion $fname not suported");
 		}
 		$leftchild = filter_node($node->childs[2]->childs[0]);
 		$rightchild = filter_node($node->childs[2]->childs[2]);
@@ -377,7 +287,7 @@ function filter_node($node)
 	}
 	else {
 		// ошибка
-		throw new Exception("Not supported operator ".$nodetype." ".$node->value());
+		throw new Exception("not supported operator ".$nodetype." ".$node->value());
 	}
 	
 	return $curNode;
@@ -386,20 +296,12 @@ function filter_node($node)
 
 function buildTree($expression, $typeOfVars) {
 
-	$res = null;
 	// создать лексическое дерево
 	$lang = new block_formal_langs_language_cpp_parseable_language();
 	if (isset($donotstripcomments)) {
 		$lang->parser()->set_strip_comments(false);
 	}
 	$result = $lang->create_from_string($expression);
-	//var_dump($result->syntaxtree);
-	
-	$data = new block_formal_langs_tree_dot_representation();
-    $data->build_tree($result->syntaxtree);
-    $file = fopen("treee.gv", "w");
-    fwrite($file, $data->to_dot());
-	fclose($file);
 	
 	if (count($result->syntaxtree) > 1 || $result->syntaxtree[0]->type()==='operators') {
 		throw new Exception("Expression invalid");
@@ -408,70 +310,8 @@ function buildTree($expression, $typeOfVars) {
 	// создать дерево свое
 	$root = filter_node($result->syntaxtree[0]);
 	
-	//echo "----------\n";
-	/*
-	var_dump($root);
-	$file = fopen("tree.gv", "w");
-	fwrite($file,'digraph {');
-	printTreeToDOT($file, $root);
-	fwrite($file,'}');
-	fclose($file);
-	*/ 
-	
 	return $root;
 	
 }
-	
-function readTypeVar($file) {
-	
-	ini_set('error_reporting', 30711);
-	
-	$file = '..\testinput\test.xml';
-	
-	function startElement($parser, $name, $attrs) {
-		global $typeOfVars;
-		if ($name === "CONST") {
-			if (count($attrs) != 2) {
-				throw new Exception("Not enough attributes of counst in line ".xml_get_current_line_number($parser));
-			}
-			$typeOfVars[$attrs["VALUE"]] = $attrs["TYPE"]; 			
-		}
-		elseif ($name === "ARRAY" || $name === "VAR") {
-			if (count($attrs) != 2) {
-				throw new Exception("Not enough attributes of array in line ".xml_get_current_line_number($parser));
-			}
-			$typeOfVars[$attrs["NAME"]] = $attrs["TYPE"];
-		}
-		elseif ($name !== "EXPRESSION") {
-			$line = xml_get_current_line_number($parser);
-			throw new Exception("Unexpected element xlm in line ".$line." : ".$name);
-		}
-			   
-	}
-	
-	function endElement($parser, $name) {
-	}
-	
-	
-	$xml_parser = xml_parser_create();
-	xml_set_element_handler($xml_parser, "startElement", "endElement");
-	if ( !file_exists($file) ) {
-        throw new Exception("Xml-file not found");
-    }
-	
-	$fp = fopen($file, "r");
-	
-	while ($data = fread($fp, 4096)) {
-	    if (!xml_parse($xml_parser, $data, feof($fp))) {
-	        throw new Exception("Error parsing xml in line ".xml_get_current_line_number($xml_parser));
-	    }
-	}
-	
-	xml_parser_free($xml_parser);
-		
-}
-
-
-
 
 ?>

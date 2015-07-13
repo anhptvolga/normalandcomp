@@ -3,9 +3,15 @@
 
 require_once 'BaseNode.php';
 
+/*!
+ * \class OneDimNode
+ *
+ * \brief Базовый класс для унарных операций
+ * 
+ */
 abstract class OneDimNode extends BaseNode {
 	
-	public $children;
+	public $children;				///< указатель на сын
 	
 	public function convertEachChildrens() {
 		// convert children
@@ -36,6 +42,12 @@ abstract class OneDimNode extends BaseNode {
 
 /////////////////////////////////////////////////////////////////////
 
+/*!
+* \class UnaryMinusOperator
+*
+* \brief Класс для операции унарного минуса
+*
+*/
 class UnaryMinusOperator extends OneDimNode {
 	
 	public function convert($parent) {
@@ -69,7 +81,12 @@ class UnaryMinusOperator extends OneDimNode {
 	}
 }
 
-
+/*!
+* \class NotLogicOperator
+*
+* \brief Класс для операции логического отрицания НЕ
+*
+*/
 class NotLogicOperator extends OneDimNode {
 	
 	public function convert($parent) {
@@ -81,7 +98,12 @@ class NotLogicOperator extends OneDimNode {
 	}
 }
 
-
+/*!
+* \class DereferenceOperator
+*
+* \brief Класс для операции непрямого обращения (через указатель)
+*
+*/
 class DereferenceOperator extends OneDimNode {
 	
 	public function convert($parent) {
@@ -93,7 +115,12 @@ class DereferenceOperator extends OneDimNode {
 	}
 }
 
-
+/*!
+* \class ReferenceOperator
+*
+* \brief Класс для операции обращения к адресу
+*
+*/
 class ReferenceOperator extends OneDimNode {
 	
 	public function convert($parent) {

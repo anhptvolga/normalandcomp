@@ -3,10 +3,19 @@
 
 require_once 'BaseNode.php';
 
+/*!
+ * \class KDimNode
+ *
+ * \brief Базовый класс для операции сложения, умножения, логического сложения, логического умножения
+ *
+ */
 abstract class KDimNode extends BaseNode {
 	
-	public $childrens = array();
+	public $childrens = array();			///< список сыновей
 	
+	/*!
+	 * Функция сортировки сыновей
+	 */
 	public function sortChildrens() {
 		
 		for ($i = 0; $i < count($this->childrens); $i++) {
@@ -21,6 +30,9 @@ abstract class KDimNode extends BaseNode {
 		
 	}
 	
+	/*!
+	* Функция перенести сын вверх
+	*/
 	public function goUpChildrens() {
 		for ($i = 0; $i < count($this->childrens); $i ++) {
 			if (get_class($this) == get_class($this->childrens[$i])) {
@@ -75,6 +87,12 @@ abstract class KDimNode extends BaseNode {
 
 /////////////////////////////////////////////////////////////////
 
+/*!
+ * \class PlusOperator
+ *
+ * \brief Класс для операции сложения
+ * 
+ */
 class PlusOperator extends KDimNode {
 	
 	public function convert($parent) {
@@ -126,6 +144,12 @@ class PlusOperator extends KDimNode {
 	
 }
 
+/*!
+* \class MultiOperator
+*
+* \brief Класс для операции умножения
+*
+*/
 class MultiOperator extends KDimNode {
 	
 	public function convert($parent) {
@@ -174,8 +198,16 @@ class MultiOperator extends KDimNode {
 		}
 	}
 	
+	/*!
+	 * Вычислить константу: сложение констант в списке сыновьей.
+	 *
+	 * \param [out] isHavePlus флаг: есть ли в списке сыновей операция сложения
+	 * \param [out] isAdd флаг: есть ли в списке сыновей целая константа
+	 *
+	 * \return значение целой константы если есть
+	 */
 	public function calculateConst(&$isHavePlus, &$isAdd) {
-		$value = 1;						// произведение целых констант
+		$value = 1;							// произведение целых констант
 		$dvalue = 1;						// произведение вещественных констант
 		$isdAdd = FALSE;					// флаг есть ли вещественных констант
 		// для каждого сына
@@ -217,6 +249,12 @@ class MultiOperator extends KDimNode {
 		return $value;
 	}
 	
+	/*!
+	 * Считать количесво операндов отрицательные
+	 *
+	 * \param [out] value значение целой константы после преобразования знака
+	 * \return 
+	 */
 	public function countNegative(&$value) {
 		$numOfNegative = 0;			// результат
 		for ($i = 0; $i < count($this->childrens); $i++) {
@@ -237,7 +275,12 @@ class MultiOperator extends KDimNode {
 		}
 		return $numOfNegative;
 	}
-	
+
+	/*!
+	* Дублировать сыновей
+	* 
+	* \param [in] value количество раз для дублирования сыновей
+	*/	
 	public function duplicateChild($value) {
 		$toDup = array();
 		for ($i = 0; $i < count($this->childrens); $i++) {
@@ -277,6 +320,9 @@ class MultiOperator extends KDimNode {
 			$this->pToNewChild = $tmp;
 	}
 	
+	/*!
+	* Функция преобразования дробей при умножении
+	*/
 	public function convertDivInMult()	{
 		$divop = array();				// временный массив
 		// взять дроби
@@ -294,7 +340,7 @@ class MultiOperator extends KDimNode {
 				array_push($tmp->childrens, $value->right);
 			}
 			$newch = new DivOperator();
-			$newch->left = new Operand("1", 1, VarType::INT);
+			$newch->left = new Operand("1", 1);
 			$newch->right = $tmp;
 			$newch->calculateTreeInString();
 			$divop = array($newch);
@@ -305,6 +351,10 @@ class MultiOperator extends KDimNode {
 		}
 	}
 	
+	/*!
+	* Функция раскрытия скобок
+	* \return указатель на узел сложения произведений
+	*/
 	public function openBracket(){
 		$multElements = array();		// список умножителей
 		$conf = array();				// перестановка
@@ -347,6 +397,12 @@ class MultiOperator extends KDimNode {
 	
 }
 
+/*!
+ * \class AndLogicOperator
+ *
+ * \brief Класс для операции логического умножения
+ * 
+ */
 class AndLogicOperator extends KDimNode {
 	
 	public function convert($parent) {
@@ -394,7 +450,12 @@ class AndLogicOperator extends KDimNode {
 	
 }
 
-
+/*!
+* \class OrLogicOperator
+*
+* \brief Класс для операции логического сложения
+*
+*/
 class OrLogicOperator extends KDimNode {
 	
 	public function convert($parent) {
@@ -429,6 +490,14 @@ class OrLogicOperator extends KDimNode {
 		$this->convertQuineMcCluskey();
 	}
 	
+	/*! 
+	 * Проверка можно ли два операнды операции сравнения одинаковые
+	 * 
+	 * \param [in] one операнд первой операции сравнения
+	 * \param [in] two операнд второй операции сравнения
+	 *
+	 * \return true если они одинаковые и можно преобразовать в вид >= или <=, в противном случае false
+	 */
 	public function isChildsSame($one, $two) {
 		// проверка левого сына a и b
 		if (isTreeEqual($one->left, $two->left))
@@ -449,6 +518,9 @@ class OrLogicOperator extends KDimNode {
 		return isTreeEqual($tmp, $two->left);
 	}
 	
+	/*! 
+	 * Преобразовать операций сравнений > (<) и == в вид >= (<=)
+	 */
 	public function reduceCompare()	{
 		$vtemp = array();		// временной вектор сыновей
 		// нахождение сравнения можно сокращать
@@ -510,6 +582,14 @@ class OrLogicOperator extends KDimNode {
 		$this->childrens = $vtemp;
 	}
 	
+	/*! 
+	 * Проверка возможно скеивания и нахождение разной позиции в записях сыновей
+	 *
+	 * \param [in] one первая двоичная запись сына
+	 * \param [in] two вторая двоичная запись сына
+	 *
+	 * \return неотрицательное число - разная позиция для склеивания при возможно, в противном случае -1
+	 */
 	public function isChangeable($one, $two) {
 		$diff = 0;			// общее число разных позициях
 		$diff01 = 0;		// число разных позициях 0 и 1
@@ -531,6 +611,14 @@ class OrLogicOperator extends KDimNode {
 		return -1;
 	}
 	
+	/*! 
+	 * Считать значение в таблице покрытий
+	 *
+	 * \param [in] imp простая импликанта
+	 * \param [in] old импликанта
+	 *
+	 * \return значение в таблице покрытий
+	 */
 	public function isCover($imp, $old)	{
 		// проверка каждой записи
 		for ($i = 0; $i < strlen($imp); $i++) {
@@ -541,6 +629,13 @@ class OrLogicOperator extends KDimNode {
 		return TRUE;
 	}
 	
+	/*!
+	 * Проверка узел был ли в векторе
+	 * \param [in] node укзатель узла, нужен проверять
+	 * \param [in] vec вектор узлов
+	 *
+	 * \return true если в векторе появился узел, в противном случае false
+	 */
 	public function isHaveNode($node, $vec)	{
 		foreach ($vec as $value) {
 			if (isTreeEqual($node, $value)){
@@ -550,6 +645,13 @@ class OrLogicOperator extends KDimNode {
 		return FALSE;
 	}
 	
+	/*!
+	 * Найти позицию сына в полном виде функции
+	 * \param [in] node узказатель на сын
+	 * \param [in] vec вектор полного вида функции
+	 *
+	 * \return позицию сына в полном виде функции
+	 */
 	public function posInFullExp($node, $vec)	{
 		for ($i = 0; $i < count($vec); $i ++) {
 			if (isTreeEqual($node, $vec[$i])){
@@ -559,6 +661,11 @@ class OrLogicOperator extends KDimNode {
 		return -1;
 	}
 	
+	/*!
+	 * Создать полный вид функции
+	 *
+	 * \param [out] fullExp полный вид функции
+	 */
 	public function makeFullExp(&$fullExp)	{
 		// каждый сын
 		for ($i = 0; $i < count($this->childrens); $i++) {
@@ -592,6 +699,12 @@ class OrLogicOperator extends KDimNode {
 		}
 	}
 	
+	/*!
+	 * Создать двоичный вид для каждого сына
+	 * 
+	 * \param [in] fullExp полный вид функции
+	 * \param [out] eachChild двоичные записи каждого сына
+	 */
 	public function makeEachChildrenNotation($fullExp, &$eachChild)	{
 		// создать двоичный вид для каждого сына
 		for ($i = 0; $i < count($this->childrens); $i++)
@@ -622,6 +735,11 @@ class OrLogicOperator extends KDimNode {
 		}
 	}
 	
+	/*!
+	 * Создать простые импликанты из двоичных записях
+	 *
+	 * \param [in,out] eachChild двоичные записи преобразуется в простые импликанты
+	 */
 	public function makeImplicate(&$eachChild) {
 		// создать простые импликанты
 		$isStop = FALSE;			// флаг стопа
@@ -672,6 +790,14 @@ class OrLogicOperator extends KDimNode {
 			$eachChild = array();
 	}
 	
+	/*!
+	 * Нахождение совокупности простых импликант, соответствующих минимальной ДНФ
+	 * \param [in] eachChild простые импликанты
+	 * \param [in] impl начальные импликанты
+	 * \param [in] coverage таблица покрытий
+	 *
+	 * \return число, биты которого описывается МДНФ
+	 */
 	public function findMinCover($eachChild, $impl, $coverage)	{
 		// нахождение совокупности простых импликант, соответствующих минимальной ДНФ
 		$mincf = (1 << count($eachChild)) - 1;		// минимальный совокупность, отмечать в битах
@@ -707,6 +833,13 @@ class OrLogicOperator extends KDimNode {
 		return $mincf;
 	}
 	
+	/*!
+	 * Функция нахождения первой позиции не символа в строке
+	 * \param [in] str строка, в которой нужно найти
+	 * \param [in] ch символ
+	 * \param [pos] начальная позиция нахождения
+	 * \return позиция при удалось найти, инача -1
+	 */
 	public function find_first_not_of($str, $ch, $pos = 0)	{
 		for ($i = $pos; $i < strlen($str); $i ++) {
 			if ($str[$i] != $ch) {
@@ -716,6 +849,13 @@ class OrLogicOperator extends KDimNode {
 		return -1;
 	}
 	
+	/*!
+	 * Создать новый дерево МДНФ
+	 *
+	 * \param [in] eachChild простые импликанты
+	 * \param [in] mincf число, биты которого описывается МДНФ
+	 * \param [in] fullExp полный вид функции
+	 */
 	public function makeMinTree($eachChild, $mincf, $fullExp)	{
 		// удалить текущие сыновья
 		$this->childrens = array();
@@ -759,6 +899,9 @@ class OrLogicOperator extends KDimNode {
 		}
 	}
 	
+	/*!
+	 * Преобразовать методом Квайна - Мак-Класки
+	 */
 	public function convertQuineMcCluskey()	{
 		$fullExp = array();							// полный вид функции
 		$eachChild = array();						// двоичная запись каждого сына

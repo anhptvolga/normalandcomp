@@ -5,8 +5,8 @@ require_once 'BaseNode.php';
 
 abstract class BinaryNode extends BaseNode {
 	
-	public $left;
-	public $right;
+	public $left;				///< указатель на левый сын
+	public $right;				///< указатель на правый сын
 	
 	public function convertEachChildrens() {
 		// convert left children
@@ -55,6 +55,12 @@ abstract class BinaryNode extends BaseNode {
 
 ////////////////////////////////////////////////////////
 
+/*!
+* \class AssignOperator
+*
+* \brief Класс для операции присваивания
+*
+*/
 class AssignOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -62,6 +68,12 @@ class AssignOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class DivOperator
+*
+* \brief Класс для операции деления
+*
+*/
 class DivOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -96,6 +108,12 @@ class DivOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class ModOperator
+*
+* \brief Класс для операции вычисления остатка
+*
+*/
 class ModOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -103,6 +121,12 @@ class ModOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class PowFunction
+*
+* \brief Класс для функции pow()
+*
+*/
 class PowFunction extends BinaryNode {
 	
 	public function convert($parent) {
@@ -121,6 +145,12 @@ class PowFunction extends BinaryNode {
 	}
 }
 
+/*!
+* \class MinusOperator
+*
+* \brief Класс для операции вычитания
+*
+*/
 class MinusOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -138,6 +168,12 @@ class MinusOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class NotEqualOperator
+*
+* \brief Класс для операции сравнения неравенства
+*
+*/
 class NotEqualOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -160,6 +196,12 @@ class NotEqualOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class EqualOperator
+*
+* \brief Класс для операции сравнения равенства
+*
+*/
 class EqualOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -195,6 +237,12 @@ class EqualOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class MemAccOperator
+*
+* \brief Класс для операции обращения к члену структуры
+*
+*/
 class MemAccOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -211,6 +259,12 @@ class MemAccOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class PtMemAccOperator
+*
+* \brief Класс для операции обращения к члену структуры (через указатель)
+*
+*/
 class PtMemAccOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -218,6 +272,12 @@ class PtMemAccOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class SubscriptOperator
+*
+* \brief Класс для операции обращения к элементу массива
+*
+*/
 class SubscriptOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -235,6 +295,12 @@ class SubscriptOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class ShiftRightOperator
+*
+* \brief Класс для операции побитового сдвига право
+*
+*/
 class ShiftRightOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -254,6 +320,12 @@ class ShiftRightOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class ShiftLeftOperator
+*
+* \brief Класс для операции побитового сдвига влево
+*
+*/
 class ShiftLeftOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -274,6 +346,12 @@ class ShiftLeftOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class GreaterEqualOperator
+*
+* \brief Класс для операции сравнения больше или равно
+*
+*/
 class GreaterEqualOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -303,6 +381,12 @@ class GreaterEqualOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class GreaterOperator
+*
+* \brief Класс для операции сравнения больше
+*
+*/
 class GreaterOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -332,6 +416,12 @@ class GreaterOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class LessEqualOperator
+*
+* \brief Класс для операции сравнения меньше или равно
+*
+*/
 class LessEqualOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -346,6 +436,12 @@ class LessEqualOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class LessOperator
+*
+* \brief Класс для операции сравнения меньше
+*
+*/
 class LessOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -361,6 +457,12 @@ class LessOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class PlusAssignOperator
+*
+* \brief Класс для операции сложение, совмещённое с присваиванием
+*
+*/
 class PlusAssignOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -380,6 +482,12 @@ class PlusAssignOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class MinusAssignOperator
+*
+* \brief Класс для операции вычитание, совмещённое с присваиванием
+*
+*/
 class MinusAssignOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -399,6 +507,12 @@ class MinusAssignOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class DivAssignOperator
+*
+* \brief Класс для операции деление, совмещённое с присваиванием
+*
+*/
 class DivAssignOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -418,6 +532,12 @@ class DivAssignOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class MultiAssignOperator
+*
+* \brief Класс для операции умножение, совмещённое с присваиванием
+*
+*/
 class MultiAssignOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -437,6 +557,12 @@ class MultiAssignOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class ShrAssignOperator
+*
+* \brief Класс для операции побитовый сдвиг вправо, совмещённый с присваиванием
+*
+*/
 class ShrAssignOperator extends BinaryNode {
 	
 	public function convert($parent) {
@@ -456,6 +582,12 @@ class ShrAssignOperator extends BinaryNode {
 	}
 }
 
+/*!
+* \class ShlAssignOperator
+*
+* \brief Класс для операции побитовый сдвиг влево, совмещённый с присваиванием
+*
+*/
 class ShlAssignOperator extends BinaryNode {
 	
 	public function convert($parent) {

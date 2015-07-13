@@ -12,7 +12,6 @@ class Operand extends BaseNode {
 	function __construct($name="", $number=null, $typeOfVar = null)	{
 		$this->name = $name;
 		$this->number = $number;
-		$this->typeOfVar = $typeOfVar;
 		$this->treeInString = $name;
 		$this->pToNewChild = null;
 	}

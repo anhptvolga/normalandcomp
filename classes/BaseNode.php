@@ -1,45 +1,41 @@
 
 <?php
 
-interface VarType {
-	const CONSTSHORT 		= 0;
-	const CONSTINT 			= 1;
-	const CONSTLONGINT 		= 2;
-	
-	const CONSTFLOAT 		= 3;
-	const CONSTDOUBLE 		= 4;
-	const CONSTLONGDOUBLE 	= 5;
-	
-	const SHORT 			= 6;
-	const INT 				= 7;
-	const LONGINT 			= 8;
-	
-	const FLOAT 			= 9;
-	const DOUBLE 			= 10;
-	const LONGDOUBLE 		= 11;
-	
-	const CHAR 				= 12;
-	const ARRAYS 			= 13;
-	const STRUCT			= 14;
-	
-	const BOOLVAR 			= 15;
-	
-	const ERRORVAR 			= 16;
-}
-
+/*!
+ * \class BaseNode
+ *
+ * \brief Базовый класс для дерева
+ * 
+ */
 abstract class BaseNode {
 	
-	public $pToNewChild = null;
-	public $treeInString = null;
+	public $pToNewChild = null;					///< указатель на новый сын если текущий сын заменился
+	public $treeInString = null;				///< дерево в вид строки для сортировки
 	
+	/*!
+	 * Функция преобразования узла
+	 * \param [in] parent - указатель на родитель
+	 */
 	abstract public function convert($parent);
 	
+	/*!
+	* Функция преобразования каждого сына текущего узла
+	*/
 	abstract public function convertEachChildrens();
 	
+	/*!
+	* Функция вычисления дерево в вид строки
+	*/
 	abstract public function calculateTreeInString();
 	
+	/*!
+	* Функция удаления всех сыновей текущего узла
+	*/
 	abstract public function deleteChildrens();
 	
+	/*!
+	 * Взять тип класс в виде нормальной оператор
+	 */
 	public function getLabel($nodetype)	{
 		switch ($nodetype) {
 			case 'PlusOperator':
