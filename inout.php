@@ -126,6 +126,7 @@ function readExp($filename) {
 	if ($file !== FALSE) {
 		$res = fgets($file);
 		fclose($file);
+		$res = rtrim($res);
 	}
 	else {
 		throw new Exception("file not found");
@@ -133,6 +134,7 @@ function readExp($filename) {
 	if (strlen($res) == 0) {
 		throw new Exception("no expession in file");
 	}
+	return $res;
 }
 
 /**
@@ -294,13 +296,14 @@ function filter_node($node)  {
 }
 
 
-function buildTree($expression, $typeOfVars) {
+function buildTree($expression) {
 
 	// создать лексическое дерево
 	$lang = new block_formal_langs_language_cpp_parseable_language();
 	if (isset($donotstripcomments)) {
 		$lang->parser()->set_strip_comments(false);
 	}
+
 	$result = $lang->create_from_string($expression);
 	
 	if (count($result->syntaxtree) > 1 || $result->syntaxtree[0]->type()==='operators') {
