@@ -3,7 +3,7 @@
 
 require_once 'BaseNode.php';
 
-class Operand extends BaseNode {
+class qtype_correctwriting_operand extends qtype_correctwriting_base_node {
 	
 	public $name = null;
 	public $number = null;
@@ -12,8 +12,8 @@ class Operand extends BaseNode {
 	function __construct($name="", $number=null, $typeOfVar = null)	{
 		$this->name = $name;
 		$this->number = $number;
-		$this->treeInString = $name;
-		$this->pToNewChild = null;
+		$this->treeinstring = $name;
+		$this->ptonewchild = null;
 	}
 	
 	public function convert($parent) {
@@ -24,8 +24,8 @@ class Operand extends BaseNode {
 		
 	}
 	
-	public function calculateTreeInString() {
-		$this->treeInString = $this->name;	
+	public function calculatetreeinstring() {
+		$this->treeinstring = $this->name;	
 	}
 	
 	public function deleteChildrens()	{

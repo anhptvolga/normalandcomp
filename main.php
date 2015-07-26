@@ -1,7 +1,7 @@
 <?php
     
     
-require_once 'inout.php';
+require_once('inout.php');
 
 
 function processEachExpression($filename, $filegv) {
@@ -9,11 +9,11 @@ function processEachExpression($filename, $filegv) {
 		$exp = readExp($filename);
 		$tree = buildTree($exp);
 		// преобразовать
-		$tree->pToNewChild = null;
+		$tree->ptonewchild = null;
 		$tree->convert($tree);
-		while ($tree->pToNewChild != null){
-			$tree = $tree->pToNewChild;
-			$tree->pToNewChild = null;
+		while ($tree->ptonewchild != null){
+			$tree = $tree->ptonewchild;
+			$tree->ptonewchild = null;
 			$tree->convert($tree);
 		}
 		// печать DOT файл

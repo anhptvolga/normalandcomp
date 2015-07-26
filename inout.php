@@ -1,22 +1,19 @@
 <?php
-
-
 global $CFG;
-
 define('MOODLE_INTERNAL', 1);
 
 $CFG = new stdClass();
-$CFG->dirroot = dirname(dirname(dirname(__FILE__)));
-$CFG->libdir = $CFG->dirroot . '/lib';
+$CFG->dirroot = dirname(dirname(dirname(dirname(dirname(__FILE__)))));
+$CFG->libdir = $CFG->dirroot . '/lib'; 
 
 require_once($CFG->dirroot .'/lib/classes/text.php');
 require_once($CFG->dirroot .'/blocks/formal_langs/language_cpp_parseable_language.php');
-require_once($CFG->dirroot .'/blocks/normalandcomp/classes/OneDimNode.php');
-require_once($CFG->dirroot .'/blocks/normalandcomp/classes/KDimNode.php');
-require_once($CFG->dirroot .'/blocks/normalandcomp/classes/BinaryNode.php');
-require_once($CFG->dirroot .'/blocks/normalandcomp/classes/Operand.php');
+require_once($CFG->dirroot .'/question/type/correctwriting/normalandcomp/classes/OneDimNode.php');
+require_once($CFG->dirroot .'/question/type/correctwriting/normalandcomp/classes/KDimNode.php');
+require_once($CFG->dirroot .'/question/type/correctwriting/normalandcomp/classes/BinaryNode.php');
+require_once($CFG->dirroot .'/question/type/correctwriting/normalandcomp/classes/Operand.php');
 
-/*!
+/**
  * Печать дерево в формат DOT
  *
  * \param [in] file указатель на выходный файл
@@ -29,7 +26,7 @@ function printTreeToDOT($file, $curNode) {
 	// инкремент общий индетификатор
 	++$globalid;
 	// печать определение для данного узла
-	if (is_a($curNode, 'Operand')){
+	if (is_a($curNode, 'qtype_correctwriting_operand')){
 		fwrite($file, $id.' [label = '.$curNode->name);
 	}
 	else {
@@ -37,19 +34,19 @@ function printTreeToDOT($file, $curNode) {
 	}
 	fwrite($file,"]\n");
 	// переход на сыновья
-	if (is_subclass_of($curNode, 'OneDimNode')) {			// унарный узел
+	if (is_subclass_of($curNode, 'qtype_correctwriting_one_dim_node')) {			// унарный узел
 		$next = $globalid;
 		printTreeToDOT($file, $curNode->children);
 		fwrite($file, $id.' -> '.$next."\n");
 	}
-	elseif (is_subclass_of($curNode, 'KDimNode')) {			// двоичной узел
+	elseif (is_subclass_of($curNode, 'qtype_correctwriting_k_dim_node')) {			// двоичной узел
 		foreach ($curNode->childrens as $value) {
 			$next = $globalid;
 			printTreeToDOT($file, $value);
 			fwrite($file, $id.' -> '.$next."\n");
 		}
 	}
-	elseif (is_subclass_of($curNode, 'BinaryNode')) {		// k-dim узел
+	elseif (is_subclass_of($curNode, 'qtype_correctwriting_binary_node')) {		// k-dim узел
 		$next = $globalid;
 		printTreeToDOT($file, $curNode->left);
 		fwrite($file, $id.' -> '.$next."\n");
@@ -60,7 +57,7 @@ function printTreeToDOT($file, $curNode) {
 }
 
 
-/*!
+/**
  * \brief Функция сравнения двух деревьев
  *
  * \param [in] tree1 указатель на узел первого дерева
@@ -80,7 +77,7 @@ function isTreeEqual($tree1, $tree2, $isPrintDiff = FALSE) {
 		}
 		return false;
 	}
-	if (is_a($tree1, 'Operand')){							// операнд
+	if (is_a($tree1, 'qtype_correctwriting_operand')){							// операнд
 		if ($tree1->name != $tree2->name){
 			// печать разницы при тестировать
 			if ($isPrintDiff){
@@ -100,14 +97,14 @@ function isTreeEqual($tree1, $tree2, $isPrintDiff = FALSE) {
 			return false;
 		}
 	}
-	elseif (is_subclass_of($tree1, 'OneDimNode')) {				// унарный
+	elseif (is_subclass_of($tree1, 'qtype_correctwriting_one_dim_node')) {				// унарный
 		return isTreeEqual($tree1->children, $tree2->children, $isPrintDiff);
 	}
-	elseif (is_subclass_of($tree1, 'BinaryNode')) {				// бинарный
+	elseif (is_subclass_of($tree1, 'qtype_correctwriting_binary_node')) {				// бинарный
 		return isTreeEqual($tree1->left, $tree2->left, $isPrintDiff) &&
 				isTreeEqual($tree1->right, $tree2->right, $isPrintDiff);
 	}
-	elseif (is_subclass_of($tree1, 'KDimNode')) {				// k-dim
+	elseif (is_subclass_of($tree1, 'qtype_correctwriting_k_dim_node')) {				// k-dim
 		$res = count($tree1->childrens) == count($tree2->childrens);
 		$i = 0;
 		while ($res && $i < count($tree1->childrens)) {
@@ -143,69 +140,69 @@ function readExp($filename) {
 function getInstane($classname) {
 	switch ($classname) {
 		case 'identifier':
-			return new Operand();
+			return new qtype_correctwriting_operand();
 		case 'expr_logical_or':
-			return new OrLogicOperator();
+			return new qtype_correctwriting_or_logic_operator();
 		case 'expr_logical_and':
-			return new AndLogicOperator();
+			return new qtype_correctwriting_and_logic_operator();
 		case 'expr_plus':
-			return new PlusOperator();
+			return new qtype_correctwriting_plus_operator();
 		case 'expr_multiply':
-			return new MultiOperator();
+			return new qtype_correctwriting_multi_operator();
 			
 		case 'expr_logical_not':
-			return new NotLogicOperator();
+			return new qtype_correctwriting_not_logic_operator();
 		case 'expr_unary_minus':
-			return new UnaryMinusOperator();
+			return new qtype_correctwriting_unary_minus_operator();
 		case 'expr_dereference':
-			return new DereferenceOperator();
+			return new qtype_correctwriting_dereference_operator();
 		case 'expr_take_adress':
-			return new ReferenceOperator();
+			return new qtype_correctwriting_reference_operator();
 			
 		case 'expr_function_call':
-			return new PowFunction();
+			return new qtype_correctwriting_pow_function();
 		case 'expr_assign':
-			return new AssignOperator();
+			return new qtype_correctwriting_assign_operator();
 		case 'expr_minus':
-			return new MinusOperator();
+			return new qtype_correctwriting_minus_operator();
 		case 'expr_modulosign':
-			return new ModOperator();
+			return new qtype_correctwriting_mod_operator();
 		case 'expr_division':
-			return new DivOperator();
+			return new qtype_correctwriting_div_operator();
 		case 'expr_equal':
-			return new EqualOperator();
+			return new qtype_correctwriting_equal_operator();
 		case 'expr_notequal':
-			return new NotEqualOperator();
+			return new qtype_correctwriting_not_equal_operator();
 		case 'try_value_access':
-			return new MemAccOperator();
+			return new qtype_correctwriting_mem_acc_operator();
 		case 'try_pointer_access':
-			return new PtMemAccOperator();		
+			return new qtype_correctwriting_pt_mem_acc_operator();		
 		case 'expr_array_access':
-			return new SubscriptOperator();
+			return new qtype_correctwriting_subscript_operator();
 		case 'expr_rightshift':
-			return new ShiftRightOperator();
+			return new qtype_correctwriting_shift_right_operator();
 		case 'expr_leftshift':
-			return new ShiftLeftOperator();
+			return new qtype_correctwriting_shift_left_operator();
 		case 'expr_lesser_or_equal':
-			return new LessEqualOperator();
+			return new qtype_correctwriting_less_equal_operator();
 		case 'expr_greater_or_equal':
-			return new GreaterEqualOperator();
+			return new qtype_correctwriting_greater_equal_operator();
 		case 'expr_lesser':
-			return new LessOperator();
+			return new qtype_correctwriting_less_operator();
 		case 'expr_greater':
-			return new GreaterOperator();
+			return new qtype_correctwriting_greater_operator();
 		case 'expr_plus_assign':
-			return new PlusAssignOperator();
+			return new qtype_correctwriting_plus_assign_operator();
 		case 'expr_minus_assign':
-			return new MinusAssignOperator();
+			return new qtype_correctwriting_minus_assign_operator();
 		case 'expr_multiply_assign':
-			return new MultiAssignOperator();
+			return new qtype_correctwriting_multi_assign_operator();
 		case 'expr_division_assign':
-			return new DivAssignOperator();
+			return new qtype_correctwriting_div_assign_operator();
 		case 'expr_leftshift_assign':
-			return new ShlAssignOperator();
+			return new qtype_correctwriting_shl_assign_operator();
 		case 'expr_rightshift_assign':
-			return new ShrAssignOperator();
+			return new qtype_correctwriting_shr_assign_operator();
 	}
 	return null;
 }
@@ -221,9 +218,9 @@ function filter_node($node)  {
 	$rightchild = null;						// указатель на правый сын
 
 	if ($nodetype === 'identifier' || $nodetype === 'numeric') { 						// операнд
-		$curNode = new Operand();
+		$curNode = new qtype_correctwriting_operand();
 		$curNode->name = $node->value();
-		$curNode->treeInString = $curNode->name;
+		$curNode->treeinstring = $curNode->name;
 		if ($nodetype === 'numeric') {
 			$tmp = $curNode->name->string();
 			$curNode->number = ($tmp == intval($tmp)) ? intval($tmp) : doubleval($tmp);
@@ -237,10 +234,10 @@ function filter_node($node)  {
 		}
 		$leftchild = filter_node($node->childs[2]->childs[0]);
 		$rightchild = filter_node($node->childs[2]->childs[2]);
-		$curNode = new PowFunction();
+		$curNode = new qtype_correctwriting_pow_function();
 		$curNode->left = $leftchild;
 		$curNode->right = $rightchild;
-		$curNode->treeInString = "pow() ".$leftchild->treeInString." ".$rightchild->treeInString;
+		$curNode->treeinstring = "pow() ".$leftchild->treeinstring." ".$rightchild->treeinstring;
 	}
 	elseif ($nodetype === 'expr_property_access'){				// операции . и ->
 		$leftchild = filter_node($node->childs[0]->childs[0]);
@@ -248,7 +245,7 @@ function filter_node($node)  {
 		$curNode = getInstane($node->childs[0]->type());
 		$curNode->left = $leftchild;
 		$curNode->right = $rightchild;
-		$curNode->treeInString = $node->childs[0]->childs[1]->value()." ".$leftchild->treeInString." ".$rightchild->treeInString;
+		$curNode->treeinstring = $node->childs[0]->childs[1]->value()." ".$leftchild->treeinstring." ".$rightchild->treeinstring;
 	}
 	elseif ($nodetype === 'expr_brackets') {					// скобки
 		return filter_node($node->childs[1]);
@@ -261,17 +258,17 @@ function filter_node($node)  {
 		array_push($curNode->childrens, $leftchild);
 		array_push($curNode->childrens, $rightchild);
 		$curNode->goUpChildrens();
-		$curNode->treeInString = $node->childs[1]->value();
+		$curNode->treeinstring = $node->childs[1]->value();
 		
 		foreach ($curNode->childrens as $value) {
-			$curNode->treeInString .= " ".$value->treeInString;
+			$curNode->treeinstring .= " ".$value->treeinstring;
 		}
 	}
 	elseif (in_array($nodetype, array('expr_logical_not', 'expr_unary_minus', 'expr_dereference', 'expr_take_adress'))) { 
 		// one-dim узел
 		$curNode = getInstane($nodetype);
 		$curNode->children = filter_node($node->childs[1]);
-		$curNode->treeInString = $node->childs[0]->value()." ".$curNode->children->treeInString;
+		$curNode->treeinstring = $node->childs[0]->value()." ".$curNode->children->treeinstring;
 	}
 	elseif (in_array($nodetype, array('expr_assign', 'expr_minus', 'expr_modulosign', 'expr_division',
 								'expr_notequal', 'expr_equal', 'expr_array_access', 'expr_rightshift',
@@ -285,7 +282,7 @@ function filter_node($node)  {
 		$curNode = getInstane($nodetype);
 		$curNode->left = $leftchild;
 		$curNode->right = $rightchild;
-		$curNode->treeInString = $node->childs[1]->value()." ".$leftchild->treeInString." ".$rightchild->treeInString;
+		$curNode->treeinstring = $node->childs[1]->value()." ".$leftchild->treeinstring." ".$rightchild->treeinstring;
 	}
 	else {
 		// ошибка

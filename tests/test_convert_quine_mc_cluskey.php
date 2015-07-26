@@ -9,23 +9,6 @@ $typeOfVars = array();
 class testConvertQuineMcCluskeyTest extends PHPUnit_Framework_TestCase {
 	
 	public static function setUpBeforeClass() {
-		global $typeOfVars;
-		$typeOfVars["5"] = VarType::CONSTINT;
-		$typeOfVars["2"] = VarType::CONSTINT;
-		$typeOfVars["0"] = VarType::CONSTINT;
-		$typeOfVars["-2"] = VarType::CONSTINT;
-		$typeOfVars["1"] = VarType::CONSTINT;
-		$typeOfVars["2.4"] = VarType::CONSTFLOAT;
-		$typeOfVars["0.5"] = VarType::CONSTFLOAT;
-		$typeOfVars["a"] = VarType::INT;
-		$typeOfVars["b"] = VarType::FLOAT;
-		$typeOfVars["d"] = VarType::INT;
-		$typeOfVars["e"] = VarType::INT;
-		$typeOfVars["f"] = VarType::INT;
-		$typeOfVars["i"] = VarType::INT;
-		$typeOfVars["x"] = VarType::INT;
-		$typeOfVars["y"] = VarType::INT;
-		$typeOfVars["arr"] = VarType::INT;
 	}
 		
 	public function mydataProvider() {
@@ -52,8 +35,8 @@ class testConvertQuineMcCluskeyTest extends PHPUnit_Framework_TestCase {
 		$tree1->convertQuineMcCluskey();
 		
 		$tmp;
-		if (get_class($tree2) != 'OrLogicOperator') {
-			$tmp = new OrLogicOperator();
+		if (get_class($tree2) != 'qtype_correctwriting_or_logic_operator') {
+			$tmp = new qtype_correctwriting_or_logic_operator();
 			array_push($tmp->childrens, $tree2);
 			$tree2 = $tmp;	
 		}

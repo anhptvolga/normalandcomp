@@ -1,26 +1,25 @@
-
 <?php
 
 require_once 'BaseNode.php';
 
-/*!
- * \class KDimNode
+/**
+ * \class qtype_correctwriting_k_dim_node
  *
  * \brief Базовый класс для операции сложения, умножения, логического сложения, логического умножения
  *
  */
-abstract class KDimNode extends BaseNode {
+abstract class qtype_correctwriting_k_dim_node extends qtype_correctwriting_base_node {
 	
 	public $childrens = array();			///< список сыновей
 	
-	/*!
+	/**
 	 * Функция сортировки сыновей
 	 */
 	public function sortChildrens() {
 		
 		for ($i = 0; $i < count($this->childrens); $i++) {
 			for ($j = $i + 1; $j < count($this->childrens); $j++){
-				if ($this->childrens[$i]->treeInString > $this->childrens[$j]->treeInString) {
+				if ($this->childrens[$i]->treeinstring > $this->childrens[$j]->treeinstring) {
 					$tmp = $this->childrens[$i];
 					$this->childrens[$i] = $this->childrens[$j];				
 					$this->childrens[$j] = $tmp;
@@ -30,7 +29,7 @@ abstract class KDimNode extends BaseNode {
 		
 	}
 	
-	/*!
+	/**
 	* Функция перенести сын вверх
 	*/
 	public function goUpChildrens() {
@@ -52,21 +51,21 @@ abstract class KDimNode extends BaseNode {
 		foreach ($this->childrens as &$children) {	
 			// convert each children
 			$children->convert($this);
-			while ($children->pToNewChild !== null) {
-				$tmp = $children->pToNewChild;
-				$children = clone $children->pToNewChild;
+			while ($children->ptonewchild !== null) {
+				$tmp = $children->ptonewchild;
+				$children = clone $children->ptonewchild;
 				$tmp->deleteChildrens();
-				$children->pToNewChild = null;
+				$children->ptonewchild = null;
 				$children->convert($this);
 			}	
 		}	
 	}
 	
-	public function calculateTreeInString() {
-		$this->treeInString = $this->getLabel(get_class($this)).' ';
+	public function calculatetreeinstring() {
+		$this->treeinstring = $this->getLabel(get_class($this)).' ';
 		
 		foreach ($this->childrens as $value) {
-			$this->treeInString .= $value->treeInString.' ';
+			$this->treeinstring .= $value->treeinstring.' ';
 		}
 	}
 	
@@ -87,13 +86,13 @@ abstract class KDimNode extends BaseNode {
 
 /////////////////////////////////////////////////////////////////
 
-/*!
- * \class PlusOperator
+/**
+ * \class qtype_correctwriting_plus_operator
  *
  * \brief Класс для операции сложения
  * 
  */
-class PlusOperator extends KDimNode {
+class qtype_correctwriting_plus_operator extends qtype_correctwriting_k_dim_node {
 	
 	public function convert($parent) {
 		// 1.	Проверка каждого его сына: 
@@ -110,7 +109,7 @@ class PlusOperator extends KDimNode {
 		$isAdd = FALSE;							// флаг что есть ли константа
 		for ($i = 0; $i < count($this->childrens); $i ++){
 			// Если сын - это операция
-			if (get_class($this->childrens[$i]) == 'Operand') {
+			if (get_class($this->childrens[$i]) == 'qtype_correctwriting_operand') {
 				// Если сын - это констнатна
 				if ($this->childrens[$i]->number !== null) {
 					// добавить значение
@@ -127,8 +126,8 @@ class PlusOperator extends KDimNode {
 		// Если есть константа и ее значение не равно нулю
 		if ($isAdd && $value != 0) {
 			// создать новую константу
-			$tmp = new Operand(strval($value), $value);
-			$tmp->calculateTreeInString();
+			$tmp = new qtype_correctwriting_operand(strval($value), $value);
+			$tmp->calculatetreeinstring();
 			// добавлять в список сыновей
 			array_push($this->childrens, $tmp);
 		}
@@ -138,19 +137,19 @@ class PlusOperator extends KDimNode {
 		
 		// 5.	Если в списке сыновей только один сын то узел преобразуется в вид его сын
 		if (count($this->childrens) == 1)	{
-			$this->pToNewChild = $this->childrens[0];
+			$this->ptonewchild = $this->childrens[0];
 		}
 	}
 	
 }
 
-/*!
-* \class MultiOperator
+/**
+* \class qtype_correctwriting_multi_operator
 *
 * \brief Класс для операции умножения
 *
 */
-class MultiOperator extends KDimNode {
+class qtype_correctwriting_multi_operator extends qtype_correctwriting_k_dim_node {
 	
 	public function convert($parent) {
 		$isHavePlus = FALSE;
@@ -174,22 +173,22 @@ class MultiOperator extends KDimNode {
 		// если есть операция сложения то раскрывать скобки
 		if ($isHavePlus) {
 			$openedSum = $this->openBracket();
-			$this->pToNewChild = $openedSum;
+			$this->ptonewchild = $openedSum;
 			return;
 		}
 		// если только 1 сын то преобразовать в вид только его
 		if (count($this->childrens) == 1) {
-			$this->pToNewChild = $this->childrens[0];
+			$this->ptonewchild = $this->childrens[0];
 			return;
 		}
 		// проверка знак
 		$numOfNegative = $this->countNegative($value);				// число операнд отрицательно
 		// если нечетно то добавляем знак унарный минус
 		if ($numOfNegative % 2 == 1) {
-			$tmp = new UnaryMinusOperator();
+			$tmp = new qtype_correctwriting_unary_minus_operator();
 			$tmp->children = clone $this;
-			$tmp->calculateTreeInString();
-			$this->pToNewChild = $tmp;
+			$tmp->calculatetreeinstring();
+			$this->ptonewchild = $tmp;
 			return;
 		}
 		// дублировать сыны
@@ -198,7 +197,7 @@ class MultiOperator extends KDimNode {
 		}
 	}
 	
-	/*!
+	/**
 	 * Вычислить константу: сложение констант в списке сыновьей.
 	 *
 	 * \param [out] isHavePlus флаг: есть ли в списке сыновей операция сложения
@@ -213,10 +212,10 @@ class MultiOperator extends KDimNode {
 		// для каждого сына
 		for ($i = 0; $i < count($this->childrens); $i++) {
 			// проверка есть ли операция сложения
-			if (get_class($this->childrens[$i]) == 'PlusOperator')
+			if (get_class($this->childrens[$i]) == 'qtype_correctwriting_plus_operator')
 				$isHavePlus = TRUE;
 			// вычисление констант
-			if (get_class($this->childrens[$i]) == 'Operand') {
+			if (get_class($this->childrens[$i]) == 'qtype_correctwriting_operand') {
 				if (is_int($this->childrens[$i]->number)) {
 					$value *= $this->childrens[$i]->number;
 					array_splice($this->childrens, $i, 1);
@@ -234,22 +233,22 @@ class MultiOperator extends KDimNode {
 	
 		if ($isAdd) {
 			// создать новую константу
-			$tmp = new Operand(strval($value), $value);
-			$tmp->calculateTreeInString();
+			$tmp = new qtype_correctwriting_operand(strval($value), $value);
+			$tmp->calculatetreeinstring();
 			// добавлять в список сыновей
 			array_push($this->childrens, $tmp);
 		}
 		if ($isdAdd) {
 			// создать новую константу
-			$tmp = new Operand(strval($dvalue), $dvalue);
-			$tmp->calculateTreeInString();
+			$tmp = new qtype_correctwriting_operand(strval($dvalue), $dvalue);
+			$tmp->calculatetreeinstring();
 			// добавлять в список сыновей
 			array_push($this->childrens, $tmp);
 		}
 		return $value;
 	}
 	
-	/*!
+	/**
 	 * Считать количесво операндов отрицательные
 	 *
 	 * \param [out] value значение целой константы после преобразования знака
@@ -258,11 +257,11 @@ class MultiOperator extends KDimNode {
 	public function countNegative(&$value) {
 		$numOfNegative = 0;			// результат
 		for ($i = 0; $i < count($this->childrens); $i++) {
-			if (get_class($this->childrens[$i]) == 'UnaryMinusOperator') {
+			if (get_class($this->childrens[$i]) == 'qtype_correctwriting_unary_minus_operator') {
 				++$numOfNegative;
 				$this->childrens[$i] = $this->childrens[$i]->children;
 			}
-			elseif (get_class($this->childrens[$i]) == 'Operand' &&
+			elseif (get_class($this->childrens[$i]) == 'qtype_correctwriting_operand' &&
 				$this->childrens[$i]->number !== null &&
 				$this->childrens[$i]->number < 0) {
 				++$numOfNegative;
@@ -276,7 +275,7 @@ class MultiOperator extends KDimNode {
 		return $numOfNegative;
 	}
 
-	/*!
+	/**
 	* Дублировать сыновей
 	* 
 	* \param [in] value количество раз для дублирования сыновей
@@ -284,12 +283,12 @@ class MultiOperator extends KDimNode {
 	public function duplicateChild($value) {
 		$toDup = array();
 		for ($i = 0; $i < count($this->childrens); $i++) {
-			if (get_class($this->childrens[$i]) == 'Operand') {
+			if (get_class($this->childrens[$i]) == 'qtype_correctwriting_operand') {
 				if ($this->childrens[$i]->number === null || is_double($this->childrens[$i]->number)) { 
 					array_push($toDup, $this->childrens[$i]);
 				}
 			}
-			if (get_class($this->childrens[$i]) != 'Operand')
+			if (get_class($this->childrens[$i]) != 'qtype_correctwriting_operand')
 				array_push($toDup, $this->childrens[$i]);
 		}
 		// создать сын для добавления
@@ -298,29 +297,29 @@ class MultiOperator extends KDimNode {
 			$childToAdd = $toDup[0];
 		}
 		else {
-			$childToAdd = new MultiOperator();
+			$childToAdd = new qtype_correctwriting_multi_operator();
 			$childToAdd->childrens = $toDup;
-			$childToAdd->calculateTreeInString();
+			$childToAdd->calculatetreeinstring();
 		}
-		// преобразовать в PlusOperator
-		$tmp = new PlusOperator();
+		// преобразовать в qtype_correctwriting_plus_operator
+		$tmp = new qtype_correctwriting_plus_operator();
 		for ($i = 0; $i < abs($value); $i++) {
 			array_push($tmp->childrens, clone $childToAdd);
 		}
-		$tmp->calculateTreeInString();
+		$tmp->calculatetreeinstring();
 		
 		// добавление знак
 		if ($value < 0) {
-			$t = new UnaryMinusOperator();
+			$t = new qtype_correctwriting_unary_minus_operator();
 			$t->children = $tmp;
-			$t->calculateTreeInString();
-			$this->pToNewChild = $t;
+			$t->calculatetreeinstring();
+			$this->ptonewchild = $t;
 		}
 		else
-			$this->pToNewChild = $tmp;
+			$this->ptonewchild = $tmp;
 	}
 	
-	/*!
+	/**
 	* Функция преобразования дробей при умножении
 	*/
 	public function convertDivInMult()	{
@@ -335,14 +334,14 @@ class MultiOperator extends KDimNode {
 		} 
 		// создать новый 
 		if (count($divop) > 1) {
-			$tmp = new MultiOperator();
+			$tmp = new qtype_correctwriting_multi_operator();
 			foreach ($divop as $i => $value) {
 				array_push($tmp->childrens, $value->right);
 			}
 			$newch = new DivOperator();
-			$newch->left = new Operand("1", 1);
+			$newch->left = new qtype_correctwriting_operand("1", 1);
 			$newch->right = $tmp;
-			$newch->calculateTreeInString();
+			$newch->calculatetreeinstring();
 			$divop = array($newch);
 		}
 		// возвращать в списку сыновей
@@ -351,7 +350,7 @@ class MultiOperator extends KDimNode {
 		}
 	}
 	
-	/*!
+	/**
 	* Функция раскрытия скобок
 	* \return указатель на узел сложения произведений
 	*/
@@ -361,7 +360,7 @@ class MultiOperator extends KDimNode {
 		// Инициализировать список умножителей.
 		for ($i = 0; $i < count($this->childrens); $i++) {
 			$conf[$i] = 0;
-			if (get_class($this->childrens[$i]) == 'PlusOperator') {
+			if (get_class($this->childrens[$i]) == 'qtype_correctwriting_plus_operator') {
 				array_push($multElements, $this->childrens[$i]->childrens);
 			}
 			else {
@@ -369,12 +368,12 @@ class MultiOperator extends KDimNode {
 			}
 		}
 		//////////////////////////////////////////////////////////////////////////
-		$res = new PlusOperator();				// новая корень
+		$res = new qtype_correctwriting_plus_operator();				// новая корень
 		$isStop = FALSE;						// флаг стопа
 		while (!$isStop)	{
 			
 			// создать узел умножения
-			$cur = new MultiOperator();
+			$cur = new qtype_correctwriting_multi_operator();
 			for ($i = 0; $i < count($multElements); $i++) {
 				array_push($cur->childrens, clone $multElements[$i][$conf[$i]]);
 			}
@@ -397,13 +396,13 @@ class MultiOperator extends KDimNode {
 	
 }
 
-/*!
- * \class AndLogicOperator
+/**
+ * \class qtype_correctwriting_and_logic_operator
  *
  * \brief Класс для операции логического умножения
  * 
  */
-class AndLogicOperator extends KDimNode {
+class qtype_correctwriting_and_logic_operator extends qtype_correctwriting_k_dim_node {
 	
 	public function convert($parent) {
 		// преобразуем каждый сын
@@ -413,7 +412,7 @@ class AndLogicOperator extends KDimNode {
 		// преобразуется в вид только операнд
 		$isAllNot = TRUE;
 		for ($i = 0; $i < count($this->childrens); $i++) {
-			if (get_class($this->childrens[$i]) != 'NotLogicOperator') {
+			if (get_class($this->childrens[$i]) != 'qtype_correctwriting_not_logic_operator') {
 				$isAllNot = FALSE;
 			}
 			for ($j = $i + 1; $j < count($this->childrens); $j++) {
@@ -427,21 +426,21 @@ class AndLogicOperator extends KDimNode {
 		
 		// если отстаться только 1 узел то преобразуем в виде только сын
 		if (count($this->childrens) == 1) {
-			$this->pToNewChild = $this->childrens[0];
+			$this->ptonewchild = $this->childrens[0];
 			return;
 		}
 		
 		// если все операнды - операция ! то преобразовать в вид  операции ||
 		if ($isAllNot) {
-			$newChild = new OrLogicOperator();
+			$newChild = new qtype_correctwriting_or_logic_operator();
 			for ($i = 0; $i < count($this->childrens); $i++)
 				array_push($newChild->childrens, clone $this->childrens[$i]->children);
-			$newChild->calculateTreeInString();
+			$newChild->calculatetreeinstring();
 			
-			$tmp = new NotLogicOperator();
+			$tmp = new qtype_correctwriting_not_logic_operator();
 			$tmp->children = $newChild;
-			$tmp->calculateTreeInString();
-			$this->pToNewChild = $tmp;
+			$tmp->calculatetreeinstring();
+			$this->ptonewchild = $tmp;
 			return;
 		}
 		// сортировать сыновья
@@ -450,13 +449,13 @@ class AndLogicOperator extends KDimNode {
 	
 }
 
-/*!
-* \class OrLogicOperator
+/**
+* \class qtype_correctwriting_or_logic_operator
 *
 * \brief Класс для операции логического сложения
 *
 */
-class OrLogicOperator extends KDimNode {
+class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_node {
 	
 	public function convert($parent) {
 		// преобразуем каждый сын
@@ -490,7 +489,7 @@ class OrLogicOperator extends KDimNode {
 		$this->convertQuineMcCluskey();
 	}
 	
-	/*! 
+	/** 
 	 * Проверка можно ли два операнды операции сравнения одинаковые
 	 * 
 	 * \param [in] one операнд первой операции сравнения
@@ -503,22 +502,22 @@ class OrLogicOperator extends KDimNode {
 		if (isTreeEqual($one->left, $two->left))
 			return TRUE;
 		// проверка левого сына а с обратном знаком
-		$tmp = new UnaryMinusOperator();
+		$tmp = new qtype_correctwriting_unary_minus_operator();
 		// создать унарный минус
 		$tmp->children = clone $one->left;
 		// преобразовать новый узел
-		$tmp->pToNewChild = null;
+		$tmp->ptonewchild = null;
 		$tmp->convert(tmp);
-		while ($tmp->pToNewChild !== null) {
-			$tmp = $tmp->pToNewChild;
-			$tmp->pToNewChild = null;
+		while ($tmp->ptonewchild !== null) {
+			$tmp = $tmp->ptonewchild;
+			$tmp->ptonewchild = null;
 			$tmp->convert(tmp);
 		}
 		// сравнение сына a с обратном знаком
 		return isTreeEqual($tmp, $two->left);
 	}
 	
-	/*! 
+	/** 
 	 * Преобразовать операций сравнений > (<) и == в вид >= (<=)
 	 */
 	public function reduceCompare()	{
@@ -531,26 +530,26 @@ class OrLogicOperator extends KDimNode {
 				$enode;					// указатель на узел равенства
 				for ($j = $i + 1; $j < count($this->childrens) && $isAdd; $j++) {
 					$isComp = FALSE;		// флаг: нашлось ли узлы для сокращения
-					if (get_class($this->childrens[$i]) == 'GreaterOperator' &&
-						get_class($this->childrens[$j]) == 'EqualOperator') {
+					if (get_class($this->childrens[$i]) == 'qtype_correctwriting_greater_operator' &&
+						get_class($this->childrens[$j]) == 'qtype_correctwriting_equal_operator') {
 						$isComp = TRUE;
 						$lnode = $this->childrens[$i];
 						$enode = $this->childrens[$j];
 					}
-					else if (get_class($this->childrens[$i]) == 'EqualOperator' &&
-						get_class($this->childrens[$j]) == 'GreaterOperator') {
+					else if (get_class($this->childrens[$i]) == 'qtype_correctwriting_equal_operator' &&
+						get_class($this->childrens[$j]) == 'qtype_correctwriting_greater_operator') {
 						$isComp = true;
 						$lnode = $this->childrens[$j];
 						$enode = $this->childrens[$i];
 					}
-					else if (get_class($this->childrens[$i]) == 'LessOperator' &&
-						get_class($this->childrens[$j]) == 'EqualOperator') {
+					else if (get_class($this->childrens[$i]) == 'qtype_correctwriting_less_operator' &&
+						get_class($this->childrens[$j]) == 'qtype_correctwriting_equal_operator') {
 						$isComp = true;
 						$lnode = $this->childrens[$i];
 						$enode = $this->childrens[$j];
 					}
-					else if (get_class($this->childrens[$i]) == 'EqualOperator' &&
-						get_class($this->childrens[$j]) == 'LessOperator') {
+					else if (get_class($this->childrens[$i]) == 'qtype_correctwriting_equal_operator' &&
+						get_class($this->childrens[$j]) == 'qtype_correctwriting_less_operator') {
 						$isComp = true;
 						$lnode = $this->childrens[$j];
 						$enode = $this->childrens[$i];
@@ -558,15 +557,15 @@ class OrLogicOperator extends KDimNode {
 					// проверка можно ли сокращать
 					if ($isComp && $this->isChildsSame($lnode, $enode)){
 						// создать новый узел
-						if (get_class($lnode) == 'LessOperator')
-							$tmp = new LessEqualOperator();
+						if (get_class($lnode) == 'qtype_correctwriting_less_operator')
+							$tmp = new qtype_correctwriting_less_equal_operator();
 						else
-							$tmp = new GreaterEqualOperator();
+							$tmp = new qtype_correctwriting_greater_equal_operator();
 						// присваивать значения
 						$tmp->left = $lnode->left;
 						$tmp->right = $lnode->right;
 						$isAdd = FALSE;
-						$tmp->calculateTreeInString();
+						$tmp->calculatetreeinstring();
 						// добавить в временной вектор сыновей
 						array_push($vtemp, $tmp);
 						// удалить из вектора сыновей
@@ -582,7 +581,7 @@ class OrLogicOperator extends KDimNode {
 		$this->childrens = $vtemp;
 	}
 	
-	/*! 
+	/** 
 	 * Проверка возможно скеивания и нахождение разной позиции в записях сыновей
 	 *
 	 * \param [in] one первая двоичная запись сына
@@ -611,7 +610,7 @@ class OrLogicOperator extends KDimNode {
 		return -1;
 	}
 	
-	/*! 
+	/** 
 	 * Считать значение в таблице покрытий
 	 *
 	 * \param [in] imp простая импликанта
@@ -629,7 +628,7 @@ class OrLogicOperator extends KDimNode {
 		return TRUE;
 	}
 	
-	/*!
+	/**
 	 * Проверка узел был ли в векторе
 	 * \param [in] node укзатель узла, нужен проверять
 	 * \param [in] vec вектор узлов
@@ -645,7 +644,7 @@ class OrLogicOperator extends KDimNode {
 		return FALSE;
 	}
 	
-	/*!
+	/**
 	 * Найти позицию сына в полном виде функции
 	 * \param [in] node узказатель на сын
 	 * \param [in] vec вектор полного вида функции
@@ -661,7 +660,7 @@ class OrLogicOperator extends KDimNode {
 		return -1;
 	}
 	
-	/*!
+	/**
 	 * Создать полный вид функции
 	 *
 	 * \param [out] fullExp полный вид функции
@@ -672,16 +671,16 @@ class OrLogicOperator extends KDimNode {
 			$isNew = TRUE;
 			$nodetype = get_class($this->childrens[$i]);
 	
-			if ($nodetype == 'NotLogicOperator') { // если он операция ! 
+			if ($nodetype == 'qtype_correctwriting_not_logic_operator') { // если он операция ! 
 				if (!$this->isHaveNode($this->childrens[$i]->children, $fullExp)) {
 					array_push($fullExp, $this->childrens[$i]->children);
 				}
 			}
-			else if ($nodetype == 'AndLogicOperator') { // если он операция &&
+			else if ($nodetype == 'qtype_correctwriting_and_logic_operator') { // если он операция &&
 				// каждый сын операции &&
 				for ($j = 0; $j < count($this->childrens[$i]->childrens); $j++){
 					$nodetype = get_class($this->childrens[$i]->childrens[$j]);
-					if ($nodetype == 'NotLogicOperator') { // если он операция !
+					if ($nodetype == 'qtype_correctwriting_not_logic_operator') { // если он операция !
 						if (! $this->isHaveNode($this->childrens[$i]->childrens[$j]->children, $fullExp)) {
 							array_push($fullExp, $this->childrens[$i]->childrens[$j]->children);
 						}
@@ -699,7 +698,7 @@ class OrLogicOperator extends KDimNode {
 		}
 	}
 	
-	/*!
+	/**
 	 * Создать двоичный вид для каждого сына
 	 * 
 	 * \param [in] fullExp полный вид функции
@@ -714,14 +713,14 @@ class OrLogicOperator extends KDimNode {
 			for ($j = 0; $j < count($fullExp); $j++)
 				$eachChild[$i] .= '-';
 			$nodetype = get_class($this->childrens[$i]);
-			if ($nodetype == 'NotLogicOperator') { // если операция !
+			if ($nodetype == 'qtype_correctwriting_not_logic_operator') { // если операция !
 				$eachChild[$i][$this->posInFullExp($this->childrens[$i]->children, $fullExp)] = '0';
 			}
-			else if ($nodetype == 'AndLogicOperator') { // если операция &&
+			else if ($nodetype == 'qtype_correctwriting_and_logic_operator') { // если операция &&
 				for ($k = 0; $k < count($this->childrens[$i]->childrens); $k++)
 				{
 					$nodetype = get_class($this->childrens[$i]->childrens[$k]);
-					if ($nodetype == 'NotLogicOperator') { // если он операция !
+					if ($nodetype == 'qtype_correctwriting_not_logic_operator') { // если он операция !
 						$eachChild[$i][$this->posInFullExp($this->childrens[$i]->childrens[$k]->children, $fullExp)] = '0';
 					}
 					else {
@@ -735,7 +734,7 @@ class OrLogicOperator extends KDimNode {
 		}
 	}
 	
-	/*!
+	/**
 	 * Создать простые импликанты из двоичных записях
 	 *
 	 * \param [in,out] eachChild двоичные записи преобразуется в простые импликанты
@@ -790,7 +789,7 @@ class OrLogicOperator extends KDimNode {
 			$eachChild = array();
 	}
 	
-	/*!
+	/**
 	 * Нахождение совокупности простых импликант, соответствующих минимальной ДНФ
 	 * \param [in] eachChild простые импликанты
 	 * \param [in] impl начальные импликанты
@@ -833,7 +832,7 @@ class OrLogicOperator extends KDimNode {
 		return $mincf;
 	}
 	
-	/*!
+	/**
 	 * Функция нахождения первой позиции не символа в строке
 	 * \param [in] str строка, в которой нужно найти
 	 * \param [in] ch символ
@@ -849,7 +848,7 @@ class OrLogicOperator extends KDimNode {
 		return -1;
 	}
 	
-	/*!
+	/**
 	 * Создать новый дерево МДНФ
 	 *
 	 * \param [in] eachChild простые импликанты
@@ -870,36 +869,36 @@ class OrLogicOperator extends KDimNode {
 						if ($eachChild[$i][$pos] == '1')
 							array_push($this->childrens, clone $fullExp[$pos]);
 						else {
-							$tmp = new NotLogicOperator();
+							$tmp = new qtype_correctwriting_not_logic_operator();
 							$tmp->children = clone $fullExp[$pos];
 							array_push($this->childrens, $tmp);
-							$tmp->calculateTreeInString();
+							$tmp->calculatetreeinstring();
 						}
 					}
 				}
 				else {
 					// операция &&
-					$tmp = new AndLogicOperator();
+					$tmp = new qtype_correctwriting_and_logic_operator();
 					for ($j = 0; $j < strlen($eachChild[$i]); $j++) {
 						if ($eachChild[$i][$j] == '1') {
 							array_push($tmp->childrens, clone $fullExp[$j]);
 						}
 						elseif ($eachChild[$i][$j] == '0') {
-							$notOp = new NotLogicOperator();
+							$notOp = new qtype_correctwriting_not_logic_operator();
 							$notOp->children = clone $fullExp[$j];
-							$notOp->calculateTreeInString();
+							$notOp->calculatetreeinstring();
 							array_push($tmp->childrens, $notOp);
 						}
 					}
 					$tmp->sortChildrens();
-					$tmp->calculateTreeInString();
+					$tmp->calculatetreeinstring();
 					array_push($this->childrens, $tmp);
 				}
 			}
 		}
 	}
 	
-	/*!
+	/**
 	 * Преобразовать методом Квайна - Мак-Класки
 	 */
 	public function convertQuineMcCluskey()	{
@@ -934,7 +933,7 @@ class OrLogicOperator extends KDimNode {
 		$this->makeMinTree($eachChild, $mincf, $fullExp);
 		// если только 1 сын то преобразовать в вид только сын
 		if (count($this->childrens) == 1)
-			$this->pToNewChild = $this->childrens[0];
+			$this->ptonewchild = $this->childrens[0];
 	}
 }
 

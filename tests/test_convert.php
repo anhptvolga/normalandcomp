@@ -10,31 +10,6 @@ ini_set('memory_limit', '-1');
 class convertTest extends PHPUnit_Framework_TestCase {
 		
 	public static function setUpBeforeClass() {
-		global $typeOfVars;
-		$typeOfVars["5"] = VarType::CONSTINT;
-		$typeOfVars["2"] = VarType::CONSTINT;
-		$typeOfVars["3"] = VarType::CONSTINT;
-		$typeOfVars["2.00"] = VarType::CONSTFLOAT;
-		$typeOfVars["2.4"] = VarType::CONSTFLOAT;
-		$typeOfVars["0"] = VarType::CONSTINT;
-		$typeOfVars["-2"] = VarType::CONSTINT;
-		$typeOfVars["1"] = VarType::CONSTINT;
-		$typeOfVars["16"] = VarType::CONSTINT;
-		$typeOfVars["-1"] = VarType::CONSTINT;
-		$typeOfVars["-8"] = VarType::CONSTINT;
-		$typeOfVars["2.4"] = VarType::CONSTFLOAT;
-		$typeOfVars["0.5"] = VarType::CONSTFLOAT;
-		$typeOfVars["a"] = VarType::INT;
-		$typeOfVars["b"] = VarType::FLOAT;
-		$typeOfVars["c"] = VarType::INT;
-		$typeOfVars["d"] = VarType::INT;
-		$typeOfVars["e"] = VarType::INT;
-		$typeOfVars["f"] = VarType::INT;
-		$typeOfVars["i"] = VarType::INT;
-		$typeOfVars["k"] = VarType::INT;
-		$typeOfVars["x"] = VarType::INT;
-		$typeOfVars["y"] = VarType::INT;
-		$typeOfVars["arr"] = VarType::INT;
 	}
 	
 	
@@ -83,32 +58,21 @@ class convertTest extends PHPUnit_Framework_TestCase {
 		$tree1 = buildTree($expr1, $typeOfVars);
 		$tree2 = buildTree($expr2, $typeOfVars);
 		
-		$tree1->pToNewChild = null;
+		$tree1->ptonewchild = null;
 		$tree1->convert($tree1);
-		while ($tree1->pToNewChild != null){
-			$tree1 = $tree1->pToNewChild;
-			$tree1->pToNewChild = null;
+		while ($tree1->ptonewchild != null){
+			$tree1 = $tree1->ptonewchild;
+			$tree1->ptonewchild = null;
 			$tree1->convert($tree1);
 		}
 		
-		$tree2->pToNewChild = null;
+		$tree2->ptonewchild = null;
 		$tree2->convert($tree2);
-		while ($tree2->pToNewChild != null){
-			$tree2 = $tree2->pToNewChild;
-			$tree2->pToNewChild = null;
+		while ($tree2->ptonewchild != null){
+			$tree2 = $tree2->ptonewchild;
+			$tree2->ptonewchild = null;
 			$tree2->convert($tree2);
 		}
-		
-		$file = fopen("tree1.gv", "w");
-		fwrite($file,"digraph {\n");
-		printTreeToDOT($file, $tree1);
-		fwrite($file,'}');
-		fclose($file);
-		$file = fopen("tree2.gv", "w");
-		fwrite($file,"digraph {\n");
-		printTreeToDOT($file, $tree2);
-		fwrite($file,'}');
-		fclose($file);
 		
 		$this->assertTrue(isTreeEqual($tree1, $tree2, TRUE));
 		
