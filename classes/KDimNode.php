@@ -326,7 +326,7 @@ class qtype_correctwriting_multi_operator extends qtype_correctwriting_k_dim_nod
 		$divop = array();				// временный массив
 		// взять дроби
 		for ($i = 0; $i < count($this->childrens); $i ++) {
-			if (get_class($this->childrens[$i]) == 'DivOperator') {
+			if (get_class($this->childrens[$i]) == 'qtype_correctwriting_div_operator') {
 				array_push($divop, $this->childrens[$i]);
 				array_splice($this->childrens, $i, 1);
 				$i --;
@@ -338,7 +338,7 @@ class qtype_correctwriting_multi_operator extends qtype_correctwriting_k_dim_nod
 			foreach ($divop as $i => $value) {
 				array_push($tmp->childrens, $value->right);
 			}
-			$newch = new DivOperator();
+			$newch = new qtype_correctwriting_div_operator();
 			$newch->left = new qtype_correctwriting_operand("1", 1);
 			$newch->right = $tmp;
 			$newch->calculate_tree_in_string();

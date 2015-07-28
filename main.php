@@ -7,7 +7,7 @@ require_once('inout.php');
 function process_each_expression($filename, $filegv) {
 	try {
 		$exp = readExp($filename);
-		$tree = buildTree($exp);
+		$tree = build_tree($exp);
 		// преобразовать
 		$tree->ptonewchild = null;
 		$tree->convert($tree);

@@ -77,7 +77,7 @@ class qtype_correctwriting_div_operator extends qtype_correctwriting_binary_node
 	
 	public function convert($parent) {
 		// преобразовать каждый сын
-		//convert_each_childrens();
+		//$this->convert_each_childrens();
 		// если делить на дробь: a / (b/c) => a*c/b
 		while (get_class($this->right) == 'qtype_correctwriting_div_operator') {
 			$tmp = new qtype_correctwriting_multi_operator();
@@ -91,7 +91,7 @@ class qtype_correctwriting_div_operator extends qtype_correctwriting_binary_node
 		$this->convert_each_childrens();
 		// преобразовать в вид a * (1/b)
 		if (!(get_class($this->left) == 'qtype_correctwriting_operand' &&
-			$this->left->number == 1)) {
+				$this->left->number == 1)) {
 			$tmp = new qtype_correctwriting_multi_operator();
 			array_push($tmp->childrens, $this->left);
 	
@@ -100,6 +100,7 @@ class qtype_correctwriting_div_operator extends qtype_correctwriting_binary_node
 			// константа 1
 			$t2->left = new qtype_correctwriting_operand("1", 1);
 			$t2->calculate_tree_in_string();
+			
 			array_push($tmp->childrens, $t2);
 			$tmp->calculate_tree_in_string();
 			$this->ptonewchild = $tmp;

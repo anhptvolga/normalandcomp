@@ -66,6 +66,12 @@ class convertTest extends PHPUnit_Framework_TestCase {
 			$tree1->convert($tree1);
 		}
 		
+		$file = fopen("tree2.gv", "w");
+		fwrite($file,"digraph {\n");
+		print_tree_to_dot($file, $tree2);
+		fwrite($file,'}');
+		fclose($file);
+		
 		$tree2->ptonewchild = null;
 		$tree2->convert($tree2);
 		while ($tree2->ptonewchild != null){
@@ -80,11 +86,6 @@ class convertTest extends PHPUnit_Framework_TestCase {
 		fwrite($file,'}');
 		fclose($file);
 		
-		$file = fopen("tree2.gv", "w");
-		fwrite($file,"digraph {\n");
-		print_tree_to_dot($file, $tree2);
-		fwrite($file,'}');
-		fclose($file);
 		
 		$this->assertTrue(is_tree_equal($tree1, $tree2, TRUE));
 		
