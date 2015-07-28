@@ -28,13 +28,13 @@ class sortChildrensTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function test_sortchild($expr1, $expr2) {
 		global $typeOfVars;
-		$tree1 = buildTree($expr1, $typeOfVars);
-		$tree2 = buildTree($expr2, $typeOfVars);
+		$tree1 = build_tree($expr1, $typeOfVars);
+		$tree2 = build_tree($expr2, $typeOfVars);
 		
-		$tree1->sortChildrens();
-		$tree2->sortChildrens();
+		$tree1->sort_childrens();
+		$tree2->sort_childrens();
 		
-		$this->assertTrue(isTreeEqual($tree1, $tree2, FALSE));
+		$this->assertTrue(is_tree_equal($tree1, $tree2, FALSE));
 	}
 }
 

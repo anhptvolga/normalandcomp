@@ -20,15 +20,15 @@ class qtype_correctwriting_operand extends qtype_correctwriting_base_node {
 			
 	}
 	
-	public function convertEachChildrens() {
+	public function convert_each_childrens() {
 		
 	}
 	
-	public function calculatetreeinstring() {
+	public function calculate_tree_in_string() {
 		$this->treeinstring = $this->name;	
 	}
 	
-	public function deleteChildrens()	{
+	public function delete_childrens()	{
 		unset ($this->name);
 		unset ($this->number);
 		unset ($this->typeOfVar);

@@ -55,8 +55,8 @@ class convertTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function test_convert($expr1, $expr2) {
 		global $typeOfVars;
-		$tree1 = buildTree($expr1, $typeOfVars);
-		$tree2 = buildTree($expr2, $typeOfVars);
+		$tree1 = build_tree($expr1, $typeOfVars);
+		$tree2 = build_tree($expr2, $typeOfVars);
 		
 		$tree1->ptonewchild = null;
 		$tree1->convert($tree1);
@@ -74,11 +74,23 @@ class convertTest extends PHPUnit_Framework_TestCase {
 			$tree2->convert($tree2);
 		}
 		
-		$this->assertTrue(isTreeEqual($tree1, $tree2, TRUE));
+		$file = fopen("tree1.gv", "w");
+		fwrite($file,"digraph {\n");
+		print_tree_to_dot($file, $tree1);
+		fwrite($file,'}');
+		fclose($file);
+		
+		$file = fopen("tree2.gv", "w");
+		fwrite($file,"digraph {\n");
+		print_tree_to_dot($file, $tree2);
+		fwrite($file,'}');
+		fclose($file);
+		
+		$this->assertTrue(is_tree_equal($tree1, $tree2, TRUE));
 		
 		
-		$tree1->deleteChildrens();
-		$tree2->deleteChildrens();
+		$tree1->delete_childrens();
+		$tree2->delete_childrens();
 		unset($tree1);
 		unset($tree2);
 	}	

@@ -15,7 +15,7 @@ abstract class qtype_correctwriting_k_dim_node extends qtype_correctwriting_base
 	/**
 	 * Функция сортировки сыновей
 	 */
-	public function sortChildrens() {
+	public function sort_childrens() {
 		
 		for ($i = 0; $i < count($this->childrens); $i++) {
 			for ($j = $i + 1; $j < count($this->childrens); $j++){
@@ -32,7 +32,7 @@ abstract class qtype_correctwriting_k_dim_node extends qtype_correctwriting_base
 	/**
 	* Функция перенести сын вверх
 	*/
-	public function goUpChildrens() {
+	public function go_up_childrens() {
 		for ($i = 0; $i < count($this->childrens); $i ++) {
 			if (get_class($this) == get_class($this->childrens[$i])) {
 				
@@ -46,7 +46,7 @@ abstract class qtype_correctwriting_k_dim_node extends qtype_correctwriting_base
 		
 	}
 	
-	public function convertEachChildrens() {
+	public function convert_each_childrens() {
 		
 		foreach ($this->childrens as &$children) {	
 			// convert each children
@@ -54,24 +54,24 @@ abstract class qtype_correctwriting_k_dim_node extends qtype_correctwriting_base
 			while ($children->ptonewchild !== null) {
 				$tmp = $children->ptonewchild;
 				$children = clone $children->ptonewchild;
-				$tmp->deleteChildrens();
+				$tmp->delete_childrens();
 				$children->ptonewchild = null;
 				$children->convert($this);
 			}	
 		}	
 	}
 	
-	public function calculatetreeinstring() {
-		$this->treeinstring = $this->getLabel(get_class($this)).' ';
+	public function calculate_tree_in_string() {
+		$this->treeinstring = $this->get_label(get_class($this)).' ';
 		
 		foreach ($this->childrens as $value) {
 			$this->treeinstring .= $value->treeinstring.' ';
 		}
 	}
 	
-	public function deleteChildrens()	{ 
+	public function delete_childrens()	{ 
 		for ($i = 0; $i < count($this->childrens); $i ++) {
-			$this->childrens[$i]->deleteChildrens();
+			$this->childrens[$i]->delete_childrens();
 		}
 		unset ($this->childrens);
 		$this->childrens = array();
@@ -97,12 +97,12 @@ class qtype_correctwriting_plus_operator extends qtype_correctwriting_k_dim_node
 	public function convert($parent) {
 		// 1.	Проверка каждого его сына: 
 		//		его сын – операция сложения то добавить его сыновья вверх – вызов 
-		$this->goUpChildrens();
+		$this->go_up_childrens();
 		
 		// 2.	Вызов функции преобразования каждого его сына.
 		//		Снова вызов goUpChildren
-		$this->convertEachChildrens();
-		$this->goUpChildrens();
+		$this->convert_each_childrens();
+		$this->go_up_childrens();
 		
 		// 3.	Вычислить константу: сложение констант в списке сыновьей.
 		$value = 0;								// новое значение
@@ -127,13 +127,13 @@ class qtype_correctwriting_plus_operator extends qtype_correctwriting_k_dim_node
 		if ($isAdd && $value != 0) {
 			// создать новую константу
 			$tmp = new qtype_correctwriting_operand(strval($value), $value);
-			$tmp->calculatetreeinstring();
+			$tmp->calculate_tree_in_string();
 			// добавлять в список сыновей
 			array_push($this->childrens, $tmp);
 		}
 		
-		// 4.	Сортировать сыновей – вызов функция sortChildrens
-		$this->sortChildrens();
+		// 4.	Сортировать сыновей – вызов функция sort_childrens
+		$this->sort_childrens();
 		
 		// 5.	Если в списке сыновей только один сын то узел преобразуется в вид его сын
 		if (count($this->childrens) == 1)	{
@@ -157,22 +157,22 @@ class qtype_correctwriting_multi_operator extends qtype_correctwriting_k_dim_nod
 		
 		// 1.	Проверка каждого его сына: 
 		//		его сын – операция сложения то добавить его сыновья вверх – вызов goUpChildren
-		$this->goUpChildrens();
+		$this->go_up_childrens();
 		// 2.	Вызов функции преобразования каждого его сына.
 		//		снова сыновья вверх – вызов goUpChildren
-		$this->convertEachChildrens();
-		$this->goUpChildrens();
+		$this->convert_each_childrens();
+		$this->go_up_childrens();
 		// 3.	Вычислить константу: сложение констант в списке сыновьей.
-		$value = $this->calculateConst($isHavePlus, $isAdd);
+		$value = $this->calculate_const($isHavePlus, $isAdd);
 		// сортировать сыновья
-		$this->sortChildrens();
+		$this->sort_childrens();
 		// преобразовать дробей
-		$this->convertDivInMult();
+		$this->convert_div_in_mult();
 		// сортировать сыновья
-		$this->sortChildrens();
+		$this->sort_childrens();
 		// если есть операция сложения то раскрывать скобки
 		if ($isHavePlus) {
-			$openedSum = $this->openBracket();
+			$openedSum = $this->open_bracket();
 			$this->ptonewchild = $openedSum;
 			return;
 		}
@@ -182,18 +182,18 @@ class qtype_correctwriting_multi_operator extends qtype_correctwriting_k_dim_nod
 			return;
 		}
 		// проверка знак
-		$numOfNegative = $this->countNegative($value);				// число операнд отрицательно
+		$numOfNegative = $this->count_negative($value);				// число операнд отрицательно
 		// если нечетно то добавляем знак унарный минус
 		if ($numOfNegative % 2 == 1) {
 			$tmp = new qtype_correctwriting_unary_minus_operator();
 			$tmp->children = clone $this;
-			$tmp->calculatetreeinstring();
+			$tmp->calculate_tree_in_string();
 			$this->ptonewchild = $tmp;
 			return;
 		}
 		// дублировать сыны
 		if ($isAdd) {
-			$this->duplicateChild($value);
+			$this->duplicate_child($value);
 		}
 	}
 	
@@ -205,7 +205,7 @@ class qtype_correctwriting_multi_operator extends qtype_correctwriting_k_dim_nod
 	 *
 	 * \return значение целой константы если есть
 	 */
-	public function calculateConst(&$isHavePlus, &$isAdd) {
+	public function calculate_const(&$isHavePlus, &$isAdd) {
 		$value = 1;							// произведение целых констант
 		$dvalue = 1;						// произведение вещественных констант
 		$isdAdd = FALSE;					// флаг есть ли вещественных констант
@@ -234,14 +234,14 @@ class qtype_correctwriting_multi_operator extends qtype_correctwriting_k_dim_nod
 		if ($isAdd) {
 			// создать новую константу
 			$tmp = new qtype_correctwriting_operand(strval($value), $value);
-			$tmp->calculatetreeinstring();
+			$tmp->calculate_tree_in_string();
 			// добавлять в список сыновей
 			array_push($this->childrens, $tmp);
 		}
 		if ($isdAdd) {
 			// создать новую константу
 			$tmp = new qtype_correctwriting_operand(strval($dvalue), $dvalue);
-			$tmp->calculatetreeinstring();
+			$tmp->calculate_tree_in_string();
 			// добавлять в список сыновей
 			array_push($this->childrens, $tmp);
 		}
@@ -254,7 +254,7 @@ class qtype_correctwriting_multi_operator extends qtype_correctwriting_k_dim_nod
 	 * \param [out] value значение целой константы после преобразования знака
 	 * \return 
 	 */
-	public function countNegative(&$value) {
+	public function count_negative(&$value) {
 		$numOfNegative = 0;			// результат
 		for ($i = 0; $i < count($this->childrens); $i++) {
 			if (get_class($this->childrens[$i]) == 'qtype_correctwriting_unary_minus_operator') {
@@ -280,7 +280,7 @@ class qtype_correctwriting_multi_operator extends qtype_correctwriting_k_dim_nod
 	* 
 	* \param [in] value количество раз для дублирования сыновей
 	*/	
-	public function duplicateChild($value) {
+	public function duplicate_child($value) {
 		$toDup = array();
 		for ($i = 0; $i < count($this->childrens); $i++) {
 			if (get_class($this->childrens[$i]) == 'qtype_correctwriting_operand') {
@@ -299,20 +299,20 @@ class qtype_correctwriting_multi_operator extends qtype_correctwriting_k_dim_nod
 		else {
 			$childToAdd = new qtype_correctwriting_multi_operator();
 			$childToAdd->childrens = $toDup;
-			$childToAdd->calculatetreeinstring();
+			$childToAdd->calculate_tree_in_string();
 		}
 		// преобразовать в qtype_correctwriting_plus_operator
 		$tmp = new qtype_correctwriting_plus_operator();
 		for ($i = 0; $i < abs($value); $i++) {
 			array_push($tmp->childrens, clone $childToAdd);
 		}
-		$tmp->calculatetreeinstring();
+		$tmp->calculate_tree_in_string();
 		
 		// добавление знак
 		if ($value < 0) {
 			$t = new qtype_correctwriting_unary_minus_operator();
 			$t->children = $tmp;
-			$t->calculatetreeinstring();
+			$t->calculate_tree_in_string();
 			$this->ptonewchild = $t;
 		}
 		else
@@ -322,7 +322,7 @@ class qtype_correctwriting_multi_operator extends qtype_correctwriting_k_dim_nod
 	/**
 	* Функция преобразования дробей при умножении
 	*/
-	public function convertDivInMult()	{
+	public function convert_div_in_mult()	{
 		$divop = array();				// временный массив
 		// взять дроби
 		for ($i = 0; $i < count($this->childrens); $i ++) {
@@ -341,7 +341,7 @@ class qtype_correctwriting_multi_operator extends qtype_correctwriting_k_dim_nod
 			$newch = new DivOperator();
 			$newch->left = new qtype_correctwriting_operand("1", 1);
 			$newch->right = $tmp;
-			$newch->calculatetreeinstring();
+			$newch->calculate_tree_in_string();
 			$divop = array($newch);
 		}
 		// возвращать в списку сыновей
@@ -354,7 +354,7 @@ class qtype_correctwriting_multi_operator extends qtype_correctwriting_k_dim_nod
 	* Функция раскрытия скобок
 	* \return указатель на узел сложения произведений
 	*/
-	public function openBracket(){
+	public function open_bracket(){
 		$multElements = array();		// список умножителей
 		$conf = array();				// перестановка
 		// Инициализировать список умножителей.
@@ -406,7 +406,7 @@ class qtype_correctwriting_and_logic_operator extends qtype_correctwriting_k_dim
 	
 	public function convert($parent) {
 		// преобразуем каждый сын
-		$this->convertEachChildrens();
+		$this->convert_each_childrens();
 	
 		// При использовании логической операции И одинаковых операндов, 
 		// преобразуется в вид только операнд
@@ -417,7 +417,7 @@ class qtype_correctwriting_and_logic_operator extends qtype_correctwriting_k_dim
 			}
 			for ($j = $i + 1; $j < count($this->childrens); $j++) {
 				// если одинаковые то удалить один узел
-				if (isTreeEqual($this->childrens[$i], $this->childrens[$j])) {
+				if (is_tree_equal($this->childrens[$i], $this->childrens[$j])) {
 					array_splice($this->childrens, $i, 1);
 					$j--;
 				}
@@ -435,16 +435,16 @@ class qtype_correctwriting_and_logic_operator extends qtype_correctwriting_k_dim
 			$newChild = new qtype_correctwriting_or_logic_operator();
 			for ($i = 0; $i < count($this->childrens); $i++)
 				array_push($newChild->childrens, clone $this->childrens[$i]->children);
-			$newChild->calculatetreeinstring();
+			$newChild->calculate_tree_in_string();
 			
 			$tmp = new qtype_correctwriting_not_logic_operator();
 			$tmp->children = $newChild;
-			$tmp->calculatetreeinstring();
+			$tmp->calculate_tree_in_string();
 			$this->ptonewchild = $tmp;
 			return;
 		}
 		// сортировать сыновья
-		$this->sortChildrens();
+		$this->sort_childrens();
 	}
 	
 }
@@ -459,7 +459,7 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 	
 	public function convert($parent) {
 		// преобразуем каждый сын
-		$this->convertEachChildrens();
+		$this->convert_each_childrens();
 		// удалить одинаковые узлы
 		$vtemp = array();			// список новых сыновей после удаления
 		for ($i = 0; $i < count($this->childrens); $i++) {
@@ -467,7 +467,7 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 			$j = 0;
 			// проверка текущего узла был ли раньше
 			while ($isAdd && $j < count($vtemp)) {
-				if (isTreeEqual($this->childrens[$i], $vtemp[$j])) {
+				if (is_tree_equal($this->childrens[$i], $vtemp[$j])) {
 					$isAdd = false;
 				}
 				++$j;
@@ -480,13 +480,13 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 		// присваивать новый список сыновей
 		$this->childrens = $vtemp;
 		// преобразуем сравнений операций в вид >=, <=
-		$this->reduceCompare();
+		$this->reduce_compare();
 		// преобразуем каждый сын
-		$this->convertEachChildrens();
+		$this->convert_each_childrens();
 		// сортируем сыновья
-		$this->sortChildrens();
+		$this->sort_childrens();
 		// преобразуем в МДНФ 
-		$this->convertQuineMcCluskey();
+		$this->convert_quine_mc_cluskey();
 	}
 	
 	/** 
@@ -497,9 +497,9 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 	 *
 	 * \return true если они одинаковые и можно преобразовать в вид >= или <=, в противном случае false
 	 */
-	public function isChildsSame($one, $two) {
+	public function is_childs_same($one, $two) {
 		// проверка левого сына a и b
-		if (isTreeEqual($one->left, $two->left))
+		if (is_tree_equal($one->left, $two->left))
 			return TRUE;
 		// проверка левого сына а с обратном знаком
 		$tmp = new qtype_correctwriting_unary_minus_operator();
@@ -514,13 +514,13 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 			$tmp->convert(tmp);
 		}
 		// сравнение сына a с обратном знаком
-		return isTreeEqual($tmp, $two->left);
+		return is_tree_equal($tmp, $two->left);
 	}
 	
 	/** 
 	 * Преобразовать операций сравнений > (<) и == в вид >= (<=)
 	 */
-	public function reduceCompare()	{
+	public function reduce_compare()	{
 		$vtemp = array();		// временной вектор сыновей
 		// нахождение сравнения можно сокращать
 		for ($i = 0; $i < count($this->childrens); $i++) {
@@ -555,7 +555,7 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 						$enode = $this->childrens[$i];
 					}
 					// проверка можно ли сокращать
-					if ($isComp && $this->isChildsSame($lnode, $enode)){
+					if ($isComp && $this->is_childs_same($lnode, $enode)){
 						// создать новый узел
 						if (get_class($lnode) == 'qtype_correctwriting_less_operator')
 							$tmp = new qtype_correctwriting_less_equal_operator();
@@ -565,7 +565,7 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 						$tmp->left = $lnode->left;
 						$tmp->right = $lnode->right;
 						$isAdd = FALSE;
-						$tmp->calculatetreeinstring();
+						$tmp->calculate_tree_in_string();
 						// добавить в временной вектор сыновей
 						array_push($vtemp, $tmp);
 						// удалить из вектора сыновей
@@ -589,7 +589,7 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 	 *
 	 * \return неотрицательное число - разная позиция для склеивания при возможно, в противном случае -1
 	 */
-	public function isChangeable($one, $two) {
+	public function is_changeable($one, $two) {
 		$diff = 0;			// общее число разных позициях
 		$diff01 = 0;		// число разных позициях 0 и 1
 		$res = -1;			// результат
@@ -618,7 +618,7 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 	 *
 	 * \return значение в таблице покрытий
 	 */
-	public function isCover($imp, $old)	{
+	public function is_cover($imp, $old)	{
 		// проверка каждой записи
 		for ($i = 0; $i < strlen($imp); $i++) {
 			if ($imp[$i] != '-' && $imp[$i] != $old[$i])
@@ -635,9 +635,9 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 	 *
 	 * \return true если в векторе появился узел, в противном случае false
 	 */
-	public function isHaveNode($node, $vec)	{
+	public function is_have_node($node, $vec)	{
 		foreach ($vec as $value) {
-			if (isTreeEqual($node, $value)){
+			if (is_tree_equal($node, $value)){
 				return TRUE;
 			}
 		}
@@ -651,9 +651,9 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 	 *
 	 * \return позицию сына в полном виде функции
 	 */
-	public function posInFullExp($node, $vec)	{
+	public function pos_in_full_exp($node, $vec)	{
 		for ($i = 0; $i < count($vec); $i ++) {
-			if (isTreeEqual($node, $vec[$i])){
+			if (is_tree_equal($node, $vec[$i])){
 				return $i;
 			}
 		}
@@ -665,14 +665,14 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 	 *
 	 * \param [out] fullExp полный вид функции
 	 */
-	public function makeFullExp(&$fullExp)	{
+	public function make_full_exp(&$fullExp)	{
 		// каждый сын
 		for ($i = 0; $i < count($this->childrens); $i++) {
 			$isNew = TRUE;
 			$nodetype = get_class($this->childrens[$i]);
 	
 			if ($nodetype == 'qtype_correctwriting_not_logic_operator') { // если он операция ! 
-				if (!$this->isHaveNode($this->childrens[$i]->children, $fullExp)) {
+				if (!$this->is_have_node($this->childrens[$i]->children, $fullExp)) {
 					array_push($fullExp, $this->childrens[$i]->children);
 				}
 			}
@@ -681,18 +681,18 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 				for ($j = 0; $j < count($this->childrens[$i]->childrens); $j++){
 					$nodetype = get_class($this->childrens[$i]->childrens[$j]);
 					if ($nodetype == 'qtype_correctwriting_not_logic_operator') { // если он операция !
-						if (! $this->isHaveNode($this->childrens[$i]->childrens[$j]->children, $fullExp)) {
+						if (! $this->is_have_node($this->childrens[$i]->childrens[$j]->children, $fullExp)) {
 							array_push($fullExp, $this->childrens[$i]->childrens[$j]->children);
 						}
 					}
 					else {
-						if (!$this->isHaveNode($this->childrens[$i]->childrens[$j], $fullExp))
+						if (!$this->is_have_node($this->childrens[$i]->childrens[$j], $fullExp))
 							array_push($fullExp, $this->childrens[$i]->childrens[$j]);
 					}
 				}
 			}
 			else {
-				if (!$this->isHaveNode($this->childrens[$i], $fullExp))
+				if (!$this->is_have_node($this->childrens[$i], $fullExp))
 					array_push($fullExp, $this->childrens[$i]);
 			}
 		}
@@ -704,7 +704,7 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 	 * \param [in] fullExp полный вид функции
 	 * \param [out] eachChild двоичные записи каждого сына
 	 */
-	public function makeEachChildrenNotation($fullExp, &$eachChild)	{
+	public function make_each_children_notation($fullExp, &$eachChild)	{
 		// создать двоичный вид для каждого сына
 		for ($i = 0; $i < count($this->childrens); $i++)
 		{
@@ -714,22 +714,21 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 				$eachChild[$i] .= '-';
 			$nodetype = get_class($this->childrens[$i]);
 			if ($nodetype == 'qtype_correctwriting_not_logic_operator') { // если операция !
-				$eachChild[$i][$this->posInFullExp($this->childrens[$i]->children, $fullExp)] = '0';
+				$eachChild[$i][$this->pos_in_full_exp($this->childrens[$i]->children, $fullExp)] = '0';
 			}
 			else if ($nodetype == 'qtype_correctwriting_and_logic_operator') { // если операция &&
-				for ($k = 0; $k < count($this->childrens[$i]->childrens); $k++)
-				{
+				for ($k = 0; $k < count($this->childrens[$i]->childrens); $k++) {
 					$nodetype = get_class($this->childrens[$i]->childrens[$k]);
 					if ($nodetype == 'qtype_correctwriting_not_logic_operator') { // если он операция !
-						$eachChild[$i][$this->posInFullExp($this->childrens[$i]->childrens[$k]->children, $fullExp)] = '0';
+						$eachChild[$i][$this->pos_in_full_exp($this->childrens[$i]->childrens[$k]->children, $fullExp)] = '0';
 					}
 					else {
-						$eachChild[$i][$this->posInFullExp($this->childrens[$i]->childrens[$k], $fullExp)] = '1';
+						$eachChild[$i][$this->pos_in_full_exp($this->childrens[$i]->childrens[$k], $fullExp)] = '1';
 					}
 				}
 			}
 			else { // просто операнд
-				$eachChild[$i][$this->posInFullExp($this->childrens[$i], $fullExp)] = '1';
+				$eachChild[$i][$this->pos_in_full_exp($this->childrens[$i], $fullExp)] = '1';
 			}
 		}
 	}
@@ -739,7 +738,7 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 	 *
 	 * \param [in,out] eachChild двоичные записи преобразуется в простые импликанты
 	 */
-	public function makeImplicate(&$eachChild) {
+	public function make_implicate(&$eachChild) {
 		// создать простые импликанты
 		$isStop = FALSE;			// флаг стопа
 		while (!$isStop) {
@@ -749,7 +748,7 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 			for ($i = 0; $i < count($eachChild); $i++)	{
 				for ($j = $i + 1; $j < count($eachChild); $j++) {
 					// взять разную позицию в записях
-					$pos = $this->isChangeable($eachChild[$i], $eachChild[$j]);
+					$pos = $this->is_changeable($eachChild[$i], $eachChild[$j]);
 					if ($pos != -1) {
 						// склеивать
 						$s = $eachChild[$i];
@@ -797,7 +796,7 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 	 *
 	 * \return число, биты которого описывается МДНФ
 	 */
-	public function findMinCover($eachChild, $impl, $coverage)	{
+	public function find_min_cover($eachChild, $impl, $coverage)	{
 		// нахождение совокупности простых импликант, соответствующих минимальной ДНФ
 		$mincf = (1 << count($eachChild)) - 1;		// минимальный совокупность, отмечать в битах
 		$minsize = 1000000;								// текущий размер
@@ -855,7 +854,7 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 	 * \param [in] mincf число, биты которого описывается МДНФ
 	 * \param [in] fullExp полный вид функции
 	 */
-	public function makeMinTree($eachChild, $mincf, $fullExp)	{
+	public function make_min_tree($eachChild, $mincf, $fullExp)	{
 		// удалить текущие сыновья
 		$this->childrens = array();
 		for ($i = 0; $i < count($eachChild); $i++) {
@@ -872,7 +871,7 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 							$tmp = new qtype_correctwriting_not_logic_operator();
 							$tmp->children = clone $fullExp[$pos];
 							array_push($this->childrens, $tmp);
-							$tmp->calculatetreeinstring();
+							$tmp->calculate_tree_in_string();
 						}
 					}
 				}
@@ -886,12 +885,12 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 						elseif ($eachChild[$i][$j] == '0') {
 							$notOp = new qtype_correctwriting_not_logic_operator();
 							$notOp->children = clone $fullExp[$j];
-							$notOp->calculatetreeinstring();
+							$notOp->calculate_tree_in_string();
 							array_push($tmp->childrens, $notOp);
 						}
 					}
-					$tmp->sortChildrens();
-					$tmp->calculatetreeinstring();
+					$tmp->sort_childrens();
+					$tmp->calculate_tree_in_string();
 					array_push($this->childrens, $tmp);
 				}
 			}
@@ -901,36 +900,36 @@ class qtype_correctwriting_or_logic_operator extends qtype_correctwriting_k_dim_
 	/**
 	 * Преобразовать методом Квайна - Мак-Класки
 	 */
-	public function convertQuineMcCluskey()	{
+	public function convert_quine_mc_cluskey()	{
 		$fullExp = array();							// полный вид функции
 		$eachChild = array();						// двоичная запись каждого сына
 		
 		// создать полный вид функции
-		$this->makeFullExp($fullExp);
+		$this->make_full_exp($fullExp);
 		//var_dump($fullExp);
 		
 		// создать двоичный вид для каждого сына
-		$this->makeEachChildrenNotation($fullExp, $eachChild);
+		$this->make_each_children_notation($fullExp, $eachChild);
 		//var_dump($eachChild);
 		
 		$impl = $eachChild;					// вектор импликант
 		// создать простые импликанты, сохраняются в векторе eachChild
-		$this->makeImplicate($eachChild);
+		$this->make_implicate($eachChild);
 		
 		// создать таблицу покрытий
 		$coverage = array();
 		for ($i = 0; $i < count($eachChild); $i++)	{
 			$coverage[$i] = array();
 			for ($j = 0; $j < count($impl); $j++) {
-				$coverage[$i][$j] = $this->isCover($eachChild[$i], $impl[$j]);
+				$coverage[$i][$j] = $this->is_cover($eachChild[$i], $impl[$j]);
 			}
 		}
 		
 		// нахождение совокупности простых, импликантсоответствующих минимальной ДНФ
-		$mincf = $this->findMinCover($eachChild, $impl, $coverage);
+		$mincf = $this->find_min_cover($eachChild, $impl, $coverage);
 		//var_dump($mincf);
 		// создать новый дерево МДНФ
-		$this->makeMinTree($eachChild, $mincf, $fullExp);
+		$this->make_min_tree($eachChild, $mincf, $fullExp);
 		// если только 1 сын то преобразовать в вид только сын
 		if (count($this->childrens) == 1)
 			$this->ptonewchild = $this->childrens[0];

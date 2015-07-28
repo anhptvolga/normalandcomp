@@ -20,7 +20,7 @@ require_once($CFG->dirroot .'/question/type/correctwriting/normalandcomp/classes
  * \param [in] curNode указатель на текущий узел
  * 
  */
-function printTreeToDOT($file, $curNode) {
+function print_tree_to_dot($file, $curNode) {
 	static $globalid = 0;			// следующий идентификатор для узлов
 	$id = $globalid;				// идентификатор для данный узла
 	// инкремент общий индетификатор
@@ -30,28 +30,28 @@ function printTreeToDOT($file, $curNode) {
 		fwrite($file, $id.' [label = '.$curNode->name);
 	}
 	else {
-		fwrite($file, $id.' [label = "'.$curNode->getLabel(get_class($curNode)).'"');
+		fwrite($file, $id.' [label = "'.$curNode->get_label(get_class($curNode)).'"');
 	}
 	fwrite($file,"]\n");
 	// переход на сыновья
 	if (is_subclass_of($curNode, 'qtype_correctwriting_one_dim_node')) {			// унарный узел
 		$next = $globalid;
-		printTreeToDOT($file, $curNode->children);
+		print_tree_to_dot($file, $curNode->children);
 		fwrite($file, $id.' -> '.$next."\n");
 	}
 	elseif (is_subclass_of($curNode, 'qtype_correctwriting_k_dim_node')) {			// двоичной узел
 		foreach ($curNode->childrens as $value) {
 			$next = $globalid;
-			printTreeToDOT($file, $value);
+			print_tree_to_dot($file, $value);
 			fwrite($file, $id.' -> '.$next."\n");
 		}
 	}
 	elseif (is_subclass_of($curNode, 'qtype_correctwriting_binary_node')) {		// k-dim узел
 		$next = $globalid;
-		printTreeToDOT($file, $curNode->left);
+		print_tree_to_dot($file, $curNode->left);
 		fwrite($file, $id.' -> '.$next."\n");
 		$next = $globalid;
-		printTreeToDOT($file, $curNode->right);
+		print_tree_to_dot($file, $curNode->right);
 		fwrite($file, $id.' -> '.$next."\n");
 	}
 }
@@ -66,7 +66,7 @@ function printTreeToDOT($file, $curNode) {
  * \return true если два дерева равны, в противном случае false
  * 
  */
-function isTreeEqual($tree1, $tree2, $isPrintDiff = FALSE) {
+function is_tree_equal($tree1, $tree2, $isPrintDiff = FALSE) {
 	
 	if (get_class($tree1) != get_class($tree2)) {
 		// печать разницы при тестировать	
@@ -98,17 +98,17 @@ function isTreeEqual($tree1, $tree2, $isPrintDiff = FALSE) {
 		}
 	}
 	elseif (is_subclass_of($tree1, 'qtype_correctwriting_one_dim_node')) {				// унарный
-		return isTreeEqual($tree1->children, $tree2->children, $isPrintDiff);
+		return is_tree_equal($tree1->children, $tree2->children, $isPrintDiff);
 	}
 	elseif (is_subclass_of($tree1, 'qtype_correctwriting_binary_node')) {				// бинарный
-		return isTreeEqual($tree1->left, $tree2->left, $isPrintDiff) &&
-				isTreeEqual($tree1->right, $tree2->right, $isPrintDiff);
+		return is_tree_equal($tree1->left, $tree2->left, $isPrintDiff) &&
+				is_tree_equal($tree1->right, $tree2->right, $isPrintDiff);
 	}
 	elseif (is_subclass_of($tree1, 'qtype_correctwriting_k_dim_node')) {				// k-dim
 		$res = count($tree1->childrens) == count($tree2->childrens);
 		$i = 0;
 		while ($res && $i < count($tree1->childrens)) {
-			$res = $res && isTreeEqual($tree1->childrens[$i], $tree2->childrens[$i], $isPrintDiff);
+			$res = $res && is_tree_equal($tree1->childrens[$i], $tree2->childrens[$i], $isPrintDiff);
 			$i ++;
 		}
 		return $res;
@@ -257,7 +257,7 @@ function filter_node($node)  {
 		$curNode = getInstane($nodetype);
 		array_push($curNode->childrens, $leftchild);
 		array_push($curNode->childrens, $rightchild);
-		$curNode->goUpChildrens();
+		$curNode->go_up_childrens();
 		$curNode->treeinstring = $node->childs[1]->value();
 		
 		foreach ($curNode->childrens as $value) {
@@ -293,7 +293,7 @@ function filter_node($node)  {
 }
 
 
-function buildTree($expression) {
+function build_tree($expression) {
 
 	// создать лексическое дерево
 	$lang = new block_formal_langs_language_cpp_parseable_language();

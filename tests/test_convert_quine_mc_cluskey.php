@@ -29,10 +29,10 @@ class testConvertQuineMcCluskeyTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function test_sortchild($expr1, $expr2) {
 		global $typeOfVars;
-		$tree1 = buildTree($expr1, $typeOfVars);
-		$tree2 = buildTree($expr2, $typeOfVars);
+		$tree1 = build_tree($expr1, $typeOfVars);
+		$tree2 = build_tree($expr2, $typeOfVars);
 		
-		$tree1->convertQuineMcCluskey();
+		$tree1->convert_quine_mc_cluskey();
 		
 		$tmp;
 		if (get_class($tree2) != 'qtype_correctwriting_or_logic_operator') {
@@ -41,7 +41,7 @@ class testConvertQuineMcCluskeyTest extends PHPUnit_Framework_TestCase {
 			$tree2 = $tmp;	
 		}
 		
-		$this->assertTrue(isTreeEqual($tree1, $tree2, TRUE));
+		$this->assertTrue(is_tree_equal($tree1, $tree2, TRUE));
 	}
 	
 }

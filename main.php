@@ -4,7 +4,7 @@
 require_once('inout.php');
 
 
-function processEachExpression($filename, $filegv) {
+function process_each_expression($filename, $filegv) {
 	try {
 		$exp = readExp($filename);
 		$tree = buildTree($exp);
@@ -19,7 +19,7 @@ function processEachExpression($filename, $filegv) {
 		// печать DOT файл
 		$file = fopen($filegv, "w");
 		fwrite($file,"digraph {\n");
-		printTreeToDOT($file, $tree);
+		print_tree_to_dot($file, $tree);
 		fwrite($file,'}');
 		fclose($file);
 		
@@ -39,13 +39,13 @@ elseif ($argc < 3) {
 }
 else {
 	// преобразовать каждое выражение
-	$tree1 = processEachExpression($argv[1], "tree1.gv");
-	$tree2 = processEachExpression($argv[2], "tree2.gv");
+	$tree1 = process_each_expression($argv[1], "tree1.gv");
+	$tree2 = process_each_expression($argv[2], "tree2.gv");
 	
 	// сравнение
 	if ($tree1 !== null && $tree2 !== null) {
 		$file = fopen("result.txt", "w");
-		if (isTreeEqual($tree1, $tree2)) {
+		if (is_tree_equal($tree1, $tree2)) {
 			fwrite($file, 'Expression equals');
 		}	
 		else {

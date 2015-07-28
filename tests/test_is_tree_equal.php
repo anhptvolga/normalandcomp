@@ -30,9 +30,9 @@ class isTreeEqualTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function test_compareTree($expr1, $expr2, $result) {
 		global $typeOfVars;
-		$tree1 = buildTree($expr1, $typeOfVars);
-		$tree2 = buildTree($expr2, $typeOfVars);
-		$this->assertEquals($result, isTreeEqual($tree1, $tree2, FALSE));
+		$tree1 = build_tree($expr1, $typeOfVars);
+		$tree2 = build_tree($expr2, $typeOfVars);
+		$this->assertEquals($result, is_tree_equal($tree1, $tree2, FALSE));
 	}
 	
 	

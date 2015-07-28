@@ -26,12 +26,12 @@ class openBracketTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function test_openbracket($expr1, $expr2) {
 		global $typeOfVars;
-		$tree1 = buildTree($expr1, $typeOfVars);
-		$tree2 = buildTree($expr2, $typeOfVars);
+		$tree1 = build_tree($expr1, $typeOfVars);
+		$tree2 = build_tree($expr2, $typeOfVars);
 		
-		$opened = $tree1->openBracket();
+		$opened = $tree1->open_bracket();
 	
-		$this->assertTrue(isTreeEqual($opened, $tree2, TRUE));
+		$this->assertTrue(is_tree_equal($opened, $tree2, TRUE));
 		
 		
 		

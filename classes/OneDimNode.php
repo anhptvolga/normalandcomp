@@ -1,4 +1,3 @@
-
 <?php
 
 require_once 'BaseNode.php';
@@ -13,24 +12,24 @@ abstract class qtype_correctwriting_one_dim_node extends qtype_correctwriting_ba
 	
 	public $children;				///< указатель на сын
 	
-	public function convertEachChildrens() {
+	public function convert_each_childrens() {
 		// convert children
 		$this->children->convert($this);
 		while ($this->children->ptonewchild !== null) {
 			$tmp = $this->children->ptonewchild;
 			$this->children = clone $this->children->ptonewchild;
-			$tmp->deleteChildrens();
+			$tmp->delete_childrens();
 			$this->children->ptonewchild = null;
 			$this->children->convert($this);
 		}
 	}
 	
-	public function calculatetreeinstring() {
-		$this->treeinstring = $this->getLabel(get_class($this))." ".$this->children->treeinstring;	
+	public function calculate_tree_in_string() {
+		$this->treeinstring = $this->get_label(get_class($this))." ".$this->children->treeinstring;	
 	}
 	
-	public function deleteChildrens()	{
-		$this->children->deleteChildrens();
+	public function delete_childrens()	{
+		$this->children->delete_childrens();
 		unset ($this->children);
 		$this->children = null;
 	}
@@ -51,7 +50,7 @@ abstract class qtype_correctwriting_one_dim_node extends qtype_correctwriting_ba
 class qtype_correctwriting_unary_minus_operator extends qtype_correctwriting_one_dim_node {
 	
 	public function convert($parent) {
-		$this->convertEachChildrens();
+		$this->convert_each_childrens();
 		//---
 		if (get_class($this->children) == 'qtype_correctwriting_unary_minus_operator') {
 			$this->ptonewchild = $this->children->children;
@@ -72,9 +71,9 @@ class qtype_correctwriting_unary_minus_operator extends qtype_correctwriting_one
 				$t = new qtype_correctwriting_unary_minus_operator();
 				$t->children = $this->children->childrens[$i];
 				$this->children->childrens[$i] = $t;
-				$t->calculatetreeinstring();
+				$t->calculate_tree_in_string();
 			}
-			$this->children->calculatetreeinstring();
+			$this->children->calculate_tree_in_string();
 			$this->ptonewchild = $this->children;
 			return;
 		}
@@ -90,7 +89,7 @@ class qtype_correctwriting_unary_minus_operator extends qtype_correctwriting_one
 class qtype_correctwriting_not_logic_operator extends qtype_correctwriting_one_dim_node {
 	
 	public function convert($parent) {
-		$this->convertEachChildrens();
+		$this->convert_each_childrens();
 
 		if (get_class($this->children) == 'qtype_correctwriting_not_logic_operator') {
 			$this->ptonewchild = $this->children->children;
@@ -107,7 +106,7 @@ class qtype_correctwriting_not_logic_operator extends qtype_correctwriting_one_d
 class qtype_correctwriting_dereference_operator extends qtype_correctwriting_one_dim_node {
 	
 	public function convert($parent) {
-		$this->convertEachChildrens();
+		$this->convert_each_childrens();
 		// проверка сына
 		if (get_class($this->children) == 'qtype_correctwriting_reference_operator') {
 			$this->ptonewchild = $this->children->children;
@@ -124,7 +123,7 @@ class qtype_correctwriting_dereference_operator extends qtype_correctwriting_one
 class qtype_correctwriting_reference_operator extends qtype_correctwriting_one_dim_node {
 	
 	public function convert($parent) {
-		$this->convertEachChildrens();
+		$this->convert_each_childrens();
 	}
 }
 
