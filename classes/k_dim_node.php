@@ -1,6 +1,6 @@
 <?php
 
-require_once 'BaseNode.php';
+require_once 'base_node.php';
 
 /**
  * \class qtype_correctwriting_k_dim_node

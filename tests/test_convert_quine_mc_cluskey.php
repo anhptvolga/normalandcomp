@@ -1,7 +1,7 @@
 
 
 <?php
-require_once '..\classes\KDimNode.php';
+require_once '..\classes\k_dim_node.php';
 require_once '..\inout.php';
 
 $typeOfVars = array();

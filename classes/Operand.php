@@ -1,7 +1,7 @@
 
 <?php
 
-require_once 'BaseNode.php';
+require_once 'base_node.php';
 
 class qtype_correctwriting_operand extends qtype_correctwriting_base_node {
 	

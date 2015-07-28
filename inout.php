@@ -8,10 +8,10 @@ $CFG->libdir = $CFG->dirroot . '/lib';
 
 require_once($CFG->dirroot .'/lib/classes/text.php');
 require_once($CFG->dirroot .'/blocks/formal_langs/language_cpp_parseable_language.php');
-require_once($CFG->dirroot .'/question/type/correctwriting/normalandcomp/classes/OneDimNode.php');
-require_once($CFG->dirroot .'/question/type/correctwriting/normalandcomp/classes/KDimNode.php');
-require_once($CFG->dirroot .'/question/type/correctwriting/normalandcomp/classes/BinaryNode.php');
-require_once($CFG->dirroot .'/question/type/correctwriting/normalandcomp/classes/Operand.php');
+require_once($CFG->dirroot .'/question/type/correctwriting/normalandcomp/classes/one_dim_node.php');
+require_once($CFG->dirroot .'/question/type/correctwriting/normalandcomp/classes/k_dim_node.php');
+require_once($CFG->dirroot .'/question/type/correctwriting/normalandcomp/classes/binary_node.php');
+require_once($CFG->dirroot .'/question/type/correctwriting/normalandcomp/classes/operand.php');
 
 /**
  * Печать дерево в формат DOT

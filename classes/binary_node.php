@@ -1,6 +1,6 @@
 <?php
 
-require_once 'BaseNode.php';
+require_once 'base_node.php';
 
 abstract class qtype_correctwriting_binary_node extends qtype_correctwriting_base_node {
 	
